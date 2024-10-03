@@ -5,6 +5,7 @@ import gov.nist.toolkit.registrymetadata.Metadata;
 import gov.nist.toolkit.registrymsg.registry.AdhocQueryRequest;
 import gov.nist.toolkit.registrymsg.repository.RetrieveItemRequestModel;
 import gov.nist.toolkit.registrymsg.repository.RetrieveRequestModel;
+import gov.nist.toolkit.registrymsg.repository.ProvideAndRegisterModel;
 import gov.nist.toolkit.registrymsg.common.RequestHeader;
 import gov.nist.toolkit.commondatatypes.MetadataSupport;
 import gov.nist.toolkit.registrymsg.registry.RegistryResponseParser;
@@ -56,6 +57,7 @@ public class Validator {
 	SqParams storedQueryParams;
 	RequestHeader requestHeader;
 	RetrieveRequestModel retrieveRequestModel;
+	ProvideAndRegisterModel provideAndRegisterModel;
 	StringBuffer errs = new StringBuffer();
 	boolean error = false;
 	OMElement test_assertions;
@@ -109,6 +111,11 @@ public class Validator {
 
 	public Validator setRetrieveRequestModel(RetrieveRequestModel retrieveRequestModel) {
 		this.retrieveRequestModel = retrieveRequestModel;
+		return this;
+	}
+
+	public Validator setProvideAndRegisterModel(ProvideAndRegisterModel provideAndRegisterModel) {
+		this.provideAndRegisterModel = provideAndRegisterModel;
 		return this;
 	}
 
@@ -1228,6 +1235,12 @@ public class Validator {
 			case "XCR.documentId":
 				models = retrieveRequestModel.getModels();
 				rtn = models.get(0).getDocumentId();
+				break;
+			case "PRB.DocumentEntry.patientID":
+				rtn = provideAndRegisterModel.getDocumentEntryPatientId();
+				break;
+			case "PRB.DocumentEntry.mimeType":
+				rtn = provideAndRegisterModel.getDocumentEntryMimeType();
 				break;
 			case "SoapHeader.SAML.PoU.Code":
 //				OMElement pouElement = requestHeader.getAttributeStatementAttribute("urn:oasis:names:tc:xspa:1.0:subject:purposeofuse");
