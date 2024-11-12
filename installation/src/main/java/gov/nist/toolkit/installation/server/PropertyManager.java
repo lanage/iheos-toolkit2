@@ -47,6 +47,9 @@ public class PropertyManager {
 	static private final String CLIENT_CIPHER_SUITES = "Client_Cipher_Suites";
 	static private final String CLIENT_SSL_PROTOCOLS = "Client_SSL_Protocols";
 
+	static private final String GAZELLE_EVS_URL = "Gazelle_EVS_URL";
+	static private final String GAZELLE_AUTHORIZATION_STRING = "Gazelle_Authorization_String";
+
 	private String propFile;
 	private Properties toolkitProperties = null;
 
@@ -200,6 +203,17 @@ public class PropertyManager {
 	public String getToolkitGazelleConfigURL() {
 		loadProperties();
 		return (String) toolkitProperties.get(GAZELLE_CONFIG_URL);
+	}
+
+
+	public String getGazelleEVSURL() {
+		loadProperties();
+		return (String) toolkitProperties.get(GAZELLE_EVS_URL);
+	}
+
+	public String getGazelleAuthorizationString() {
+		loadProperties();
+		return (String) toolkitProperties.get(GAZELLE_AUTHORIZATION_STRING);
 	}
 
 	public String getStsActorName() throws TkNotFoundException {
