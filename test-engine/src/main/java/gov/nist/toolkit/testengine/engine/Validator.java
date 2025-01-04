@@ -1,5 +1,6 @@
 package gov.nist.toolkit.testengine.engine;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
 import gov.nist.toolkit.docref.MetadataTables;
 import gov.nist.toolkit.registrymetadata.Metadata;
 import gov.nist.toolkit.registrymsg.registry.AdhocQueryRequest;
@@ -1116,6 +1117,38 @@ public class Validator {
 			}
 		}
 
+		return rtn;
+	}
+
+	public boolean namedFieldIsInSet(String field, String expectedValue) throws Exception {
+		return this.namedFieldIsInSet(field, "", "", "", "", expectedValue);
+        }
+	public boolean namedFieldIsInSet(String field, String section, String XPath, String attribute, String comment, String expectedValue) throws Exception {
+		String submittedValue = null;
+		boolean rtn = true;
+		Set<String> setOfValues = convertToSet(expectedValue);
+		if (field == null || field.equals("")) {
+			submittedValue = extractNamedFieldString(section, XPath, attribute, comment);
+			if (!setOfValues.contains(submittedValue)) {
+				err("Metadata Content Failure (isInSet), comment: " + comment + ", expectedValue: " + expectedValue + ", submittedValue: " + submittedValue);
+				err(section + " XPath: " + XPath.replaceAll("=", "  _EQ_  ") + " @ " + attribute);
+				rtn = false;
+			}
+		} else {
+			submittedValue = extractNamedFieldString(field);
+			if (!setOfValues.contains(submittedValue)) {
+				err("Metadata Content Failure (isInSet), key: " + field + ", expectedValue: " + expectedValue + ", submittedValue: " + submittedValue);
+				rtn = false;
+			}
+		}
+
+		return rtn;
+	}
+
+	private Set<String> convertToSet(String expectedValue) {
+		String delimiter = expectedValue.substring(0,1);
+		String tokens[] = expectedValue.substring(1).split(delimiter);
+		Set<String> rtn = new HashSet<>(Arrays.asList(tokens));
 		return rtn;
 	}
 

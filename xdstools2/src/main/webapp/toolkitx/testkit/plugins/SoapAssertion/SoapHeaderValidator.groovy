@@ -121,7 +121,7 @@ class SoapHeaderValidator extends AbstractSoapValidater {
                             }
                             break;
                         default:
-                            errors="Unrecognized Stored Query validation method:" + method + ". Expecting one of single, singleCode, containsCode, contains.";
+                            errors="Unrecognized Soap Header validation method:" + method + ". Expecting one of single, singleCode, containsCode, contains, isPresent, isNotEmpty, isNotPresent.";
                             break;
                     }
                 } else {

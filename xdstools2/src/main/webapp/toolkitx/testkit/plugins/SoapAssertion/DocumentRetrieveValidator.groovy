@@ -86,6 +86,11 @@ class DocumentRetrieveValidator extends AbstractSoapValidater {
                                 errors = v.getErrors()
                             }
                             break
+                        case "isInSet":
+                            if (!v.namedFieldIsInSet(key, value)) {
+                                errors = v.getErrors()
+                            }
+                            break
                         case "containsCode":
                             if (!v.namedMetadataContainsCode(key, codeValue, codingScheme, codeDisplayName)) {
                                 errors = v.getErrors()
@@ -105,7 +110,7 @@ class DocumentRetrieveValidator extends AbstractSoapValidater {
                             }
                             break
                         default:
-                            errors="Unrecognized Document Retrieve validation method:" + method + ". Expecting one of single, singleCode, containsCode, contains."
+                            errors="Unrecognized Document Retrieve validation method:" + method + ". Expecting one of single, singleCode, containsCode, contains, atOrAfter."
                             break
                     }
                 } else {
