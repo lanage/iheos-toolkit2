@@ -73,9 +73,9 @@ public enum GazelleXuaUsername {
     // The only difference between the 1.1 and 2.0 codes is for T-IAS.
     // In the 1.1 specification, two attributes for csp and validated_attributes are added.
     // In the 2.0 specification, an id_token is add (and csp and validated_attributes are omitted).
-    // The other 5 codes (T-TRTMNT, ...) are included for completeness.
+    // The other 5 codes (T-TREAT, ...) are included for completeness.
 
-    secondpurposeofuseDOTTTRTMNT20("secondpurposeofuse.T-TRTMNT-20"),
+    secondpurposeofuseDOTTTRTMNT20("secondpurposeofuse.T-TREAT-20"),
     secondpurposeofuseDOTTPYMNT20("secondpurposeofuse.T-PYMNT-20"),
     secondpurposeofuseDOTTHCO20("secondpurposeofuse.T-HCO-20"),
     secondpurposeofuseDOTTPH20("secondpurposeofuse.T-PH-20"),
