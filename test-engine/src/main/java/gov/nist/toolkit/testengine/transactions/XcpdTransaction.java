@@ -90,6 +90,8 @@ public class XcpdTransaction  extends BasicTransaction {
         errs = new ArrayList<>();
         try {
             switch (a.process) {
+                // Triggered by <Assert id="validateXCPDResponse" process="validITI55Response"></Assert>
+                // in <XcpdTransaction> found in a testplan.xml file
                 case "validITI55Response":
                     validITI55Response(engine, a, assertion_output);
                     break;
@@ -135,12 +137,18 @@ public class XcpdTransaction  extends BasicTransaction {
             ensureGazelleEVSData();
             OMElement response = getResponse(a);
             String responseXML = response.toString();
+
+            OMElement e = a.assertElement;
+            boolean verbose = ("true".equals(e.getAttributeValue(new QName("verbose"))));
+
             String validationOID = postValidationRequest(engine, "ITI-55_Response", responseXML);
             if (validationOID == null) {
                 store(engine, CAT.ERROR, "POST to EVS returned a NULL validation OID. We cannot complete the sequence to validate this ITI-55 Response");
             } else {
                 String validationSummary = processValidationSummary(engine, validationOID);
-                String validationReport = processValidationReport(engine, validationOID);
+                if (verbose) {
+                    String validationReport = processValidationReport(engine, validationOID);
+                }
             }
 
         } catch (Exception e) {
