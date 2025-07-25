@@ -2,6 +2,8 @@ package gov.nist.toolkit.valregmetadata.validators;
 
 import gov.nist.toolkit.commondatatypes.MetadataSupport;
 import gov.nist.toolkit.errorrecording.ErrorRecorder;
+import gov.nist.toolkit.errorrecording.TextErrorRecorder;
+import gov.nist.toolkit.errorrecording.client.ValidatorErrorItem;
 import gov.nist.toolkit.errorrecording.client.XdsErrorCode;
 import gov.nist.toolkit.utilities.xml.XmlUtil;
 import gov.nist.toolkit.valregmetadata.datatype.CxFormat;
@@ -12,10 +14,9 @@ import gov.nist.toolkit.valregmetadata.model.*;
 import gov.nist.toolkit.valsupport.client.ValidationContext;
 import org.apache.axiom.om.OMElement;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.net.URISyntaxException;
+import java.util.*;
+import java.net.URI;
 
 /**
  *
@@ -89,18 +90,34 @@ public class RegistryObjectValidator {
         for (ExternalIdentifier ei : mo.getExternalIdentifiers()) {
             new ExternalIdentifierValidator(ei).validateStructure(er, vc);
             if (MetadataSupport.XDSDocumentEntry_uniqueid_uuid.equals(ei.getIdentificationScheme())) {
+                validateDocumentEntryUniqueId(er, vc, ei, desc, resource);
                 String[] parts = ei.getValue().split("\\^");
+                // These comments are superseded by those below
                 // Expecting an uniqueId to be in the format: OID^extension
                 // where OID = root.suffix (a length of 64 characters)
                 // where extension is 16 characters (CDA Document ID)
                 // In other words, a full-form of an uniqueId is: root.suffix^extension
+                //System.out.println("\n\nmetadataValidationDocumentIDCodes: " + vc.metadataValidationDocumentIDCodes + "\n\n");
+
+                // See https://profiles.ihe.net/ITI/TF/Volume3/ch-4.2.html#4.2.3.2.26
+//                The format of the DocumentEntry.uniqueId value is Identifier (see Table 4.2.3.1.7-2).
+//                Coded as an ebRIM ExternalIdentifier (see Section 4.2.3.1.3 for a description of coding an ebRIM ExternalIdentifier) which references, and is contained in, the ExtrinsicObject representing the DocumentEntry. There shall be only a single uniqueId value.
+//                Document creators should use one of the following formats for the uniqueId:
+//                OID in dot notation (see OID in Table 4.2.3.1.7-2).
+//                UUID URN-encoded (see UUID in Table 4.2.3.1.7-2).
+//                URI (see URI in Table 4.2.3.1.7-2).
+//                For documents using HL7v3 Instance Identifiers (e.g., CDAs) with an extension attribute, the uniqueId should be a serialization of the root and extension attributes in the form root^extension. The HL7v3 Instance Identifier URN encoding (using the namespace urn:hl7ii) should not be used.
+
                 new OidFormat(er, mo.identifyingString() + ": " + ei.identifyingString(), externalIdentifierDescription(desc, ei.getIdentificationScheme()))
                         .validate(parts[0]);
                 /*
+                Superseded by 4.2.3.2.26 above
                 ITI TF 3
                 4.2.3.2.26 DocumentEntry.uniqueId
                 For documents using URIs, the uniqueId should be the URI, *except* for URNs with the “urn:oid:” and “urn:uuid:” namespaces.
                 -- This is why only the plain value is stored without the URI scheme.
+                End of superseded
+
                 ITI TF 3
                 Table 4.2.3.1.7-2: Data Types (previously Table 4.1-3)
                 Identifier data type:
@@ -270,5 +287,145 @@ public class RegistryObjectValidator {
         return i;
     }
 
+    /* See IHE ITI CP-808.
+       DocumentEntry.uniqueId is now classified as an Identifier with this definition
+           A globally unique identifier. This may be one of OID, URI, UUID (as defined in this
+           table) or any other format that employs effective mechanisms to ensure global uniqueness.
+        The vc.metadataValidationDocumentIDCodes (String) is a simulator property that defines
+        how we should validate the DocumentEntry.uniqueId format
+            ""       This is the legacy mechanism. Validate as an OID
+            CP-808   Declare valid if encoded per any of OID, URI, UUID
+            a;b;c    The values for a,b,c are taken from "OID", "URI", "UUID".
+                     The user may specify any combination in any order.
+                     For example:  URI;OID
+                     The identifier is considered valid if it conforms to one of the
+                     encodings in the list. The delimiter is ; and not ,
+     */
+    private void validateDocumentEntryUniqueId(ErrorRecorder er, ValidationContext vc, ExternalIdentifier ei, ClassAndIdDescription desc, String resource) {
+        String resourceForDocumentEntryUniqueId = "ITI TF-3: 4.2.3.2.26";
+        List<String> validationCodes = new ArrayList<>();
+        Set<String> recognizedValidationCodes = new HashSet<>();
+        recognizedValidationCodes.add("OID");
+        recognizedValidationCodes.add("URI");
+        recognizedValidationCodes.add("UUID");
 
+        // Define a local variable and seed with legacy method if validation context does not provide a different value.
+        // The legacy method was originally defined for this identifier. ITI CP-808 expanded the definition, and that
+        // expanded definition is enabled by updating simulator configuration.
+        String validationMethods = ("".equals(vc.metadataValidationDocumentIDCodes)) ? "OID" : vc.metadataValidationDocumentIDCodes;
+        if ("NONE".equals(validationMethods)) {
+            // Special case where no validation is requested
+        } else if ("CP-808".equals(validationMethods)) {
+            // Shortcut for CP-808
+            validationCodes.add("OID");
+            validationCodes.add("URI");
+            validationCodes.add("UUID");
+        } else {
+            // Validation methods are codes separated by ;
+            String tokens[] = validationMethods.split(";");
+            for (int i = 0; i < tokens.length; i++) {
+                validationCodes.add(tokens[i]);
+            }
+        }
+
+        // Ensure that we recognize all validation codes
+        // If we don't, then there is a configuration error with the simulator
+        Iterator<String> it = validationCodes.iterator();
+        while (it.hasNext()) {
+            String encodingMethod = it.next();
+            if (! recognizedValidationCodes.contains(encodingMethod)) {
+                er.err(XdsErrorCode.Code.XDSRegistryMetadataError, mo.identifyingString() + ": " + ei.identifyingString() + " Unrecognized configuration code for Toolkit simulator: " + encodingMethod, this, resourceForDocumentEntryUniqueId);
+                er.err(XdsErrorCode.Code.XDSRegistryMetadataError, mo.identifyingString() + ": " + ei.identifyingString() + " Review/repair simulator configuration: " + vc.metadataValidationDocumentIDCodes, this, resourceForDocumentEntryUniqueId);
+            }
+        }
+
+        boolean isValidEncoding = false;
+        it = validationCodes.iterator();
+        while (it.hasNext() && !isValidEncoding) {
+            // Make a local recorder. We don't want to log errors in the full recorder
+            // until we are sure no validations complete successfully
+            ErrorRecorder localRecorder = new TextErrorRecorder();
+
+            String encodingMethod = it.next();
+
+            if ("OID".equals(encodingMethod)) {
+                isValidEncoding = isValidOID(ei, localRecorder, desc, resourceForDocumentEntryUniqueId);
+                if (isValidEncoding) {
+                    // Run a second time with the actual Error Recorder
+                    // This will pick up any warnings and report back
+                    // Loop will exit because 'isValidEncoding' is now true
+                    isValidOID(ei, er, desc, resourceForDocumentEntryUniqueId);
+                }
+            } else if ("URI".equals(encodingMethod)) {
+                isValidEncoding = isValidURI(ei, localRecorder, desc, resourceForDocumentEntryUniqueId);
+                if (isValidEncoding) {
+                    // Run a second time with the actual Error Recorder
+                    // This will pick up any warnings and report back
+                    // Loop will exit because 'isValidEncoding' is now true
+                    isValidURI(ei, er, desc, resourceForDocumentEntryUniqueId);
+                }
+            } else if ("UUID".equals(encodingMethod)) {
+                isValidEncoding = isValidUUID(ei, localRecorder, desc, resourceForDocumentEntryUniqueId);
+                    if (isValidEncoding) {
+                        // Run a second time with the actual Error Recorder
+                        // This will pick up any warnings and report back
+                        // Loop will exit because 'isValidEncoding' is now true
+                        isValidUUID(ei, er, desc, resourceForDocumentEntryUniqueId);
+                    }
+            } else {
+                // We flagged this error above
+            }
+        }
+
+        // If we did not find a valid encoding, run all validators again.
+        // In this loop, we use the actual error recorder so we can pass the error results back
+        if (! isValidEncoding) {
+            it = validationCodes.iterator();
+            while (it.hasNext() && !isValidEncoding) {
+                String encodingMethod = it.next();
+
+                if ("OID".equals(encodingMethod)) {
+                    isValidEncoding = isValidOID(ei, er, desc, resourceForDocumentEntryUniqueId);
+                } else if ("URI".equals(encodingMethod)) {
+                    isValidEncoding = isValidURI(ei, er, desc, resourceForDocumentEntryUniqueId);
+                } else if ("UUID".equals(encodingMethod)) {
+                    isValidEncoding = isValidUUID(ei, er, desc, resourceForDocumentEntryUniqueId);
+                } else {
+                    // We flagged this error above
+                }
+            }
+        }
+        if (! isValidEncoding) {
+            er.err(XdsErrorCode.Code.XDSRegistryMetadataError, mo.identifyingString() + ": " + ei.identifyingString() + " Validation of DocumentEntry.uniqueId failed for all configured validation methods: " + validationMethods, this, resourceForDocumentEntryUniqueId);
+        }
+    }
+
+    private boolean isValidOID(ExternalIdentifier ei, ErrorRecorder er, ClassAndIdDescription desc, String resource) {
+        String[] parts = ei.getValue().split("\\^");
+        OidFormat oidFormat = new OidFormat(er, mo.identifyingString() + ": " + ei.identifyingString(), externalIdentifierDescription(desc, ei.getIdentificationScheme()));
+        oidFormat.validate(parts[0]);
+
+        if (parts[0].length() > 64)
+            er.err(XdsErrorCode.Code.XDSRegistryMetadataError, mo.identifyingString() + ": " + ei.identifyingString() + " OID part of DocumentEntry uniqueID is limited to 64 digits", this, resource);
+        if (parts.length > 1 && parts[1].length() > 16) {
+            er.err(XdsErrorCode.Code.XDSRegistryMetadataError, mo.identifyingString() + ": " + ei.identifyingString() + " extension part of DocumentEntry uniqueID is limited to 16 characters", this, resource);
+        }
+
+        return ! er.hasErrors();
+    }
+    private boolean isValidURI(ExternalIdentifier ei, ErrorRecorder er, ClassAndIdDescription desc, String resource) {
+        String candidate = ei.getValue();
+        URI uri = null;
+        try {
+            uri = new URI(candidate);
+        } catch (URISyntaxException e) {
+            er.err(XdsErrorCode.Code.XDSRegistryMetadataError, mo.identifyingString() + ": " + ei.identifyingString() + " invalid syntax for URI per java.net.URI class: " + candidate, this, resource);
+        }
+        return ! er.hasErrors();
+    }
+    private boolean isValidUUID(ExternalIdentifier ei, ErrorRecorder er, ClassAndIdDescription desc, String resource) {
+        UuidFormat uuidFormat = new UuidFormat(er, mo.identifyingString(), resource);
+        uuidFormat.validate(ei.getValue());
+        return ! er.hasErrors();
+    }
 }
