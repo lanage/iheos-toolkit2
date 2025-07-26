@@ -75,7 +75,7 @@ public enum GazelleXuaUsername {
     // In the 2.0 specification, an id_token is add (and csp and validated_attributes are omitted).
     // The other 5 codes (T-TREAT, ...) are included for completeness.
 
-    secondpurposeofuseDOTTTRTMNT20("secondpurposeofuse.T-TREAT-20"),
+    secondpurposeofuseDOTTTRTMNT20("secondpurposeofuse.T-TRTMNT-20"),
     secondpurposeofuseDOTTPYMNT20("secondpurposeofuse.T-PYMNT-20"),
     secondpurposeofuseDOTTHCO20("secondpurposeofuse.T-HCO-20"),
     secondpurposeofuseDOTTPH20("secondpurposeofuse.T-PH-20"),
