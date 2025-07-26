@@ -21,8 +21,7 @@ import java.net.URI;
 /**
  *
  */
-public class
-RegistryObjectValidator {
+public class RegistryObjectValidator {
     AbstractRegistryObject mo;
     ObjectValidator ov;
 
