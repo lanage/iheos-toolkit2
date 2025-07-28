@@ -99,6 +99,14 @@ class StoredQueryValidator extends AbstractSoapValidater {
                                 errors = v.getErrors()
                             }
                             break;
+                        case "atOrAfter":
+                            String referenceTimestamp = value
+                            String transactionTimeStamp = sst.simDbEvent.eventId.replace('_', '')
+                            int lexicalCompare = transactionTimeStamp.compareTo(referenceTimestamp)
+                            if (lexicalCompare < 0) {
+                                errors="The transaction time stamp " + transactionTimeStamp + " is not atOrAfter the reference time stamp " + referenceTimestamp
+                            }
+                            break
                         default:
                             errors="Unrecognized Stored Query validation method:" + method + ". Expecting one of single, singleCode, containsCode, contains.";
                             break;

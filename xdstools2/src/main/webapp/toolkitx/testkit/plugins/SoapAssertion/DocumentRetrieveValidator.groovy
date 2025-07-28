@@ -12,6 +12,9 @@ import gov.nist.toolkit.testengine.engine.Validator
 import gov.nist.toolkit.registrymetadata.Metadata
 import gov.nist.toolkit.utilities.xml.Util
 import org.apache.axiom.om.OMElement
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.charset.Charset
 
 /**
  * Runs an MetadataContent validator through this plugin. @see Validator#run_test_assertions.
@@ -40,6 +43,7 @@ class DocumentRetrieveValidator extends AbstractSoapValidater {
     String codeValue
     String codingScheme
     String codeDisplayName
+    String transactionBase
 
     /**
      * Optional parameter
@@ -81,6 +85,11 @@ class DocumentRetrieveValidator extends AbstractSoapValidater {
                                 errors = v.getErrors()
                             }
                             break
+                        case "isInSet":
+                            if (!v.namedFieldIsInSet(key, value)) {
+                                errors = v.getErrors()
+                            }
+                            break
                         case "containsCode":
                             if (!v.namedMetadataContainsCode(key, codeValue, codingScheme, codeDisplayName)) {
                                 errors = v.getErrors()
@@ -89,6 +98,14 @@ class DocumentRetrieveValidator extends AbstractSoapValidater {
                         case "contains":
                             if (!v.namedFieldContains(key, value)) {
                                 errors = v.getErrors()
+                            }
+                            break
+                        case "atOrAfter":
+                            String referenceTimestamp = value
+                            String transactionTimeStamp = sst.simDbEvent.eventId.replace('_', '')
+                            int lexicalCompare = transactionTimeStamp.compareTo(referenceTimestamp)
+                            if (lexicalCompare < 0) {
+                                errors="The transaction time stamp " + transactionTimeStamp + " is not atOrAfter the reference time stamp " + referenceTimestamp
                             }
                             break
                         default:
