@@ -21,6 +21,7 @@ import org.apache.axiom.om.OMElement
 import com.auth0.jwt.JWT
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.auth0.jwt.algorithms.Algorithm
+import java.net.URL
 /**
  * Runs an MetadataContent validator through this plugin. @see Validator#run_test_assertions.
  */
@@ -116,6 +117,19 @@ class JWTValidator extends AbstractSoapValidater {
                             System.out.println("isNotEmpty")
                             testNotEmpty(valueToTest, key)
                             break
+                        case "isURL":
+                            System.out.println("isURL")
+                            testIsURL(valueToTest, key)
+                            break
+                        case "GT:INT:CONSTANT":
+                            System.out.println("greater than a constant value")
+                            testGreaterIntConstant(valueToTest, key, value)
+                            break
+                        case "GT:INT:other_payload_value":
+                            System.out.println("greater than other payload value")
+                            testGreaterIntOtherPayloadValue(valueToTest, key, value)
+                            break
+
 
                         default:
                             err("Unrecognized JWTValidator validation method:" + method + ".")
@@ -202,6 +216,59 @@ class JWTValidator extends AbstractSoapValidater {
         }
     }
 
+    private void testIsURL(String valueToTest, String key) {
+        String extractedValue = extractJWTField(valueToTest, key)
+        if (extractedValue == null) {
+            err("No value submitted in JWT for key " + key)
+            return
+        }
+        if (extractedValue.length() == 0) {
+            err("Zero length value submitted in JWT for key " + key)
+        }
+        try {
+            java.net.URL testURL = new java.net.URL(extractedValue);
+        } catch (Exception e) {
+            err("String is not a valid URL: " + extractedValue + ", submitted in JWT for key " + key);
+            String x = e.toString()
+            err(x)
+        }
+    }
+
+
+    private void testGreaterIntConstant(String valueToTest, String key, String value) {
+        String extractedValue = extractJWTField(valueToTest, key)
+        if (extractedValue == null) {
+            err("No value submitted in JWT for key " + key)
+            return
+        }
+        Integer intSubmitted = new Integer(extractedValue)
+        Integer constantValue = new Integer(value)
+
+        if (!(intSubmitted > constantValue)) {
+            err("Value (" + extractedValue + ") submitted in JWT for key " + key + " is not >  " + value)
+        }
+    }
+
+    private void testGreaterIntOtherPayloadValue(String valueToTest, String key, String value) {
+        String extractedValue = extractJWTField(valueToTest, key)
+        if (extractedValue == null) {
+            err("No value submitted in JWT for key " + key)
+            return
+        }
+        String[] valueTokens = value.split(':')
+        if (valueTokens == null || valueTokens.length != 2) {
+            err("Improperly formatted reference string " + valueTokens + ". Should be something like 'payload.iat:300'")
+            return
+        }
+        String baselineString = extractJWTField(valueToTest, valueTokens[0])
+        Integer intSubmitted = new Integer(extractedValue)
+        Integer referenceValue = new Integer(baselineString) + new Integer(valueTokens[1])
+
+        if (!(intSubmitted > referenceValue)) {
+            err("Value (" + extractedValue + ") submitted in JWT for key " + key + " is not >  " + referenceValue + " = " + valueTokens[0] + "+" + valueTokens[1])
+        }
+    }
+
     private String extractJWTField(String valueToTest, String key) {
 //        DecodedJWT jwt = JWT.require().build().verify(valueToTest)
 
@@ -214,6 +281,12 @@ class JWTValidator extends AbstractSoapValidater {
         } else if (tokens[0].equals("payload")) {
             if (tokens.length == 2) {
                 rtnValue = jwt.getClaim(tokens[1]).asString()
+                if (rtnValue == null) {
+                    Integer ix = jwt.getClaim(tokens[1]).asInt()
+                    if (ix != null) {
+                            rtnValue = ix.toString()
+                    }
+                }
             } else {
                 Map<String, Object> claimMap = jwt.getClaim(tokens[1]).asMap()
                 rtnValue = claimMap.get(tokens[2]).toString()
