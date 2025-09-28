@@ -94,6 +94,10 @@ class JWTValidator extends AbstractSoapValidater {
                 String local_errors = ""
                 if (requestMsgExpectedContent.equals("SoapHeader")) {
                     OMElement sectionElement = requestHeader.getOmElement()
+                    if (sectionElement == null) {
+                        error("JWTValidator.groovy unable to extract sectionElement from SoapHeader. Most likely cause is this message does not contain SAML data.")
+                        return new ValidaterResult(sst, this.copy(), false)
+                    }
                     String valueToTest = XmlUtil.getStringFromXPath(sectionElement, XPath)
                     if (valueToTest == null) {
                         error("XPath resulted in a null string " + XPath)
