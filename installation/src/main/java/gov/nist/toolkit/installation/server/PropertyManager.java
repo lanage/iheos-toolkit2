@@ -49,6 +49,13 @@ public class PropertyManager {
 
 	static private final String GAZELLE_EVS_URL = "Gazelle_EVS_URL";
 	static private final String GAZELLE_AUTHORIZATION_STRING = "Gazelle_Authorization_String";
+
+	static private final String SIGN_IN_LABEL="Sign_in_label";
+	static private final String SIGN_OUT_LABEL="Sign_out_label";
+	static private final String SIGNED_IN="Signed_in";
+	static private final String SIGNED_OUT="Signed_out";
+
+
 	static private final String SOCKET_TIMEOUT = "Socket_Timeout";
 	static private final String CONNECT_TIMEOUT = "Connect_Timeout";
 
