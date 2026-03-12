@@ -30,6 +30,12 @@
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>velocity</groupId>
+                    <artifactId>velocity</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>backport-util-concurrent</groupId>
