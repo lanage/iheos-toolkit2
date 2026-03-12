@@ -127,7 +127,7 @@
 		<dependency>
 			<groupId>org.apache.axis2</groupId>
 			<artifactId>addressing</artifactId>
-			<version>1.5.4</version>
+			<version>1.8.2</version>
 			<type>mar</type>
 		</dependency>
 		<dependency>
@@ -208,6 +208,7 @@
 		<dependency>
 			<groupId>net.ihe.gazelle</groupId>
 			<artifactId>sequoia-security-adaptor-jar</artifactId>
+			<version>1.0.1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>

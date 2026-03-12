@@ -99,8 +99,8 @@
         <maven-war-plugin.version>3.3.1</maven-war-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.2</nexus-staging-maven-plugin.version>
 <!--        <tomcat7-maven-plugin.version>2.2</tomcat7-maven-plugin.version>-->
-        <axis2-version>1.5.4</axis2-version>
         <!--<axis2-version>1.7.9</axis2-version>-->
+        <axis2-version>1.8.2</axis2-version>
 
         <hapi.version>2.5</hapi.version>
         <spring_version>4.3.6.RELEASE</spring_version>
@@ -165,7 +165,7 @@
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>sequoia-security-adaptor-jar</artifactId>
-                <version>1.0.1-SNAPSHOT</version>
+                <version>1.0.1</version>
             </dependency>
             <dependency>
                 <groupId>gov.nist.toolkit</groupId>
@@ -681,8 +681,8 @@
 
             <dependency>
                 <groupId>org.apache.velocity</groupId>
-                <artifactId>velocity</artifactId>
-                <version>1.5</version>
+                <artifactId>velocity-engine-core</artifactId>
+                <version>2.3</version>
             </dependency>
             <!--<dependency>-->
             <!--<groupId>org.slf4j</groupId>-->
@@ -776,11 +776,12 @@
                 <groupId>org.apache.axis2</groupId>
                 <artifactId>axis2-kernel</artifactId>
                 <version>${axis2-version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.axis2</groupId>
-                <artifactId>axis2</artifactId>
-                <version>${axis2-version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.ws.rs</groupId>
+                        <artifactId>jsr311-api</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.ow2.asm</groupId>
@@ -867,7 +868,11 @@
                 <artifactId>gwt-elemental</artifactId>
                 <version>${gwtVersion}</version>
             </dependency>
-
+            <dependency>
+                <groupId>commons-httpclient</groupId>
+                <artifactId>commons-httpclient</artifactId>
+                <version>3.1</version>
+            </dependency>
             <!--
             <dependency>
                 <groupId>ca.uhn.hapi.fhir</groupId>
@@ -950,8 +955,12 @@
                 <version>${soap-api-version}</version>
             </dependency>
             <!-- end JDK 11+ compiler support -->
-
-
+            <!-- Update javax namespace for compatibility with Axis2 updates-->
+            <dependency>
+                <groupId>javax.ws.rs</groupId>
+                <artifactId>javax.ws.rs-api</artifactId>
+                <version>2.1.1</version>
+            </dependency>
 
         </dependencies>
 
