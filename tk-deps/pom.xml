@@ -496,6 +496,12 @@
                 <groupId>org.codehaus.groovy.modules.http-builder</groupId>
                 <artifactId>http-builder</artifactId>
                 <version>0.7.1</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-collections</groupId>
+                        <artifactId>commons-collections</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
 
@@ -838,6 +844,11 @@
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpcore</artifactId>
                 <version>4.4.4</version>      <!-- updated from 4.4 - required for httpclient 4.5.2 -->
+            </dependency>
+            <dependency>
+                <groupId>commons-collections</groupId>
+                <artifactId>commons-collections</artifactId>
+                <version>3.2.2</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
