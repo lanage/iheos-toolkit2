@@ -23,8 +23,8 @@
         <!--   begin before security update   -->
 <!--        <jackson.version>2.11.3</jackson.version>   -->
         <!-- end -->
-        <jackson.version>2.12.6.1</jackson.version>
-        <jacksonauxilary.version>2.12.6</jacksonauxilary.version>
+        <jackson.version>2.12.7.1</jackson.version>
+        <jacksonauxilary.version>2.15.0</jacksonauxilary.version>
         <grizzly.version>2.4.4</grizzly.version>  <!-- 2.4.4, 2.3.22  -->
         <!--
         This Jackson version has runtime class conflicts/problems.
@@ -642,11 +642,6 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
                 <version>${jacksonauxilary.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.codehaus.jackson</groupId>
-                <artifactId>jackson-mapper-asl</artifactId>
-                <version>1.9.12</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.ws.commons.axiom</groupId>
