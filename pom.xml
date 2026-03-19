@@ -57,6 +57,16 @@
                 <artifactId>jackson-module-jaxb-annotations</artifactId>
                 <version>2.15.0</version>
             </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk15on</artifactId>
+                <version>1.60</version>
+            </dependency>
+            <dependency>
+                <groupId>org.owasp.esapi</groupId>
+                <artifactId>esapi</artifactId>
+                <version>2.5.3.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
