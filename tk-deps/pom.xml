@@ -154,6 +154,16 @@
             <id>gazelle-releases</id>
             <url>https://gazelle.ihe.net/nexus/content/repositories/releases</url>
         </repository>
+        <repository>
+            <id>shibboleth-releases</id>
+            <url>https://build.shibboleth.net/maven/releases/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
     </repositories>
 
     <scm>
@@ -161,7 +171,7 @@
     </scm>
 
     <dependencyManagement>
-        <dependencies>
+    <dependencies>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>sequoia-security-adaptor-jar</artifactId>
@@ -412,19 +422,23 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>3.18.0</version>
             </dependency>
-            <!-- External -->
+            <!-- OpenSAML 4.0.1 Dependencies -->
             <dependency>
                 <groupId>org.opensaml</groupId>
-                <artifactId>opensaml</artifactId>
-                <version>2.6.6</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>log4j-over-slf4j</artifactId>
-                    </exclusion>
-                </exclusions>
+                <artifactId>opensaml-core</artifactId>
+                <version>4.0.1</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>opensaml-saml-api</artifactId>
+                <version>4.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>opensaml-saml-impl</artifactId>
+                <version>4.0.1</version>
+            </dependency>
+                        
             <dependency>
                 <groupId>org.apache.axis2</groupId>
                 <artifactId>axis2-transport-http</artifactId>

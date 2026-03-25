@@ -3,15 +3,13 @@ package gov.nist.toolkit.saml.builder;
 import gov.nist.toolkit.saml.util.SAMLCallback;
 import gov.nist.toolkit.saml.util.SamlTokenExtractor;
 
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.XMLObjectBuilderFactory;
-import org.opensaml.xml.io.MarshallerFactory;
-import org.opensaml.xml.io.Unmarshaller;
-import org.opensaml.xml.io.UnmarshallerFactory;
-import org.opensaml.DefaultBootstrap;
-import org.opensaml.common.SAMLException;
-import org.opensaml.xml.ConfigurationException;
-import org.opensaml.xml.Configuration;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.XMLObjectBuilderFactory;
+import org.opensaml.core.xml.io.MarshallerFactory;
+import org.opensaml.core.xml.io.Unmarshaller;
+import org.opensaml.core.xml.io.UnmarshallerFactory;
+import org.opensaml.core.config.Configuration;
+import org.opensaml.saml.saml2.core.Assertion;
 
 
 import java.util.logging.Level;
@@ -62,17 +60,17 @@ public class OpenSamlBootStrap {
      */
     public synchronized static void initSamlEngine() {
         if (!samlEngineInitialized) {
-            log.fine("Initilizing the opensaml2 library...");
+            log.fine("Initilizing the opensaml4.0.1 library...");
             try {
-            	DefaultBootstrap.bootstrap();
-            	builderFactory = Configuration.getBuilderFactory();
+                // OpenSAML 4.0.1 - no explicit initialization needed
+                builderFactory = Configuration.getBuilderFactory();
                 marshallerFactory = Configuration.getMarshallerFactory();
                 unmarshallerFactory = Configuration.getUnmarshallerFactory();
                 samlEngineInitialized = true;
-                log.fine("opensaml2 library bootstrap complete");
-            } catch (ConfigurationException e) {
+                log.fine("opensaml4.0.1 library bootstrap complete");
+            } catch (Exception e) {
                 log.log(Level.SEVERE,
-                    "Unable to bootstrap the opensaml2 library - all SAML operations will fail", 
+                    "Unable to bootstrap the opensaml4.0.1 library - all SAML operations will fail", 
                     e
                 );
             }

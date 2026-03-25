@@ -8,20 +8,19 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 	
 import javax.xml.namespace.QName;
-import org.opensaml.saml2.core.Assertion;
-import org.opensaml.saml2.core.KeyInfoConfirmationDataType;
-import org.opensaml.saml2.core.SubjectConfirmation;
-import org.opensaml.saml2.core.SubjectConfirmationData;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.security.keyinfo.KeyInfoHelper;
-import org.opensaml.xml.signature.DSAKeyValue;
-import org.opensaml.xml.signature.KeyInfo;
-import org.opensaml.xml.signature.KeyValue;
-import org.opensaml.xml.signature.RSAKeyValue;
-import org.opensaml.xml.signature.X509Data;
-import org.opensaml.xml.util.LazyList;
-import org.opensaml.xml.util.Pair;
-import org.opensaml.xml.validation.ValidationException;
+import org.opensaml.saml.saml2.core.Assertion;
+import org.opensaml.saml.saml2.core.KeyInfoConfirmationDataType;
+import org.opensaml.saml.saml2.core.SubjectConfirmation;
+import org.opensaml.saml.saml2.core.SubjectConfirmationData;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.xmlsec.keyinfo.KeyInfoHelper;
+import org.opensaml.xmlsec.signature.DSAKeyValue;
+import org.opensaml.xmlsec.signature.KeyInfo;
+import org.opensaml.xmlsec.signature.KeyValue;
+import org.opensaml.xmlsec.signature.RSAKeyValue;
+import org.opensaml.xmlsec.signature.X509Data;
+import java.util.ArrayList;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.xml.namespace.QName;
 /**
@@ -89,7 +88,7 @@ public class HolderOfKeySubjectConfirmationValidator extends AbstractSubjectConf
 	@Override
 	protected ValidationResult doValidate(SubjectConfirmation confirmation,
 			Assertion assertion, ValidationContext context)
-			throws ValidationException {
+			throws Exception {
 		   if (!isValidConfirmationDataType(confirmation)) {
 	            String msg = String.format(
 	                    "Subject confirmation data is not of type '%s'", KeyInfoConfirmationDataType.TYPE_NAME);
@@ -106,16 +105,16 @@ public class HolderOfKeySubjectConfirmationValidator extends AbstractSubjectConf
 	        }
 	
 	        Pair<PublicKey, X509Certificate> keyCertPair = getKeyAndCertificate(context);
-	        if (keyCertPair.getFirst() == null && keyCertPair.getSecond() == null) {
+	        if (keyCertPair.getLeft() == null && keyCertPair.getRight() == null) {
 	            context.setValidationFailureMessage("Neither the presenter's certificate nor its public key were provided");
 	            return ValidationResult.INDETERMINATE;
 	        }
 	
 	        for (KeyInfo keyInfo : possibleKeys) {
-	            if (matchesKeyValue(keyCertPair.getFirst(), keyInfo)) {
+	            if (matchesKeyValue(keyCertPair.getLeft(), keyInfo)) {
 	                context.getDynamicParameters().put(CONFIRMED_KEY_INFO_PARAM, keyInfo);
 	                return ValidationResult.VALID;
-	            } else if (matchesX509Certificate(keyCertPair.getSecond(), keyInfo)) {
+	            } else if (matchesX509Certificate(keyCertPair.getRight(), keyInfo)) {
 	                context.getDynamicParameters().put(CONFIRMED_KEY_INFO_PARAM, keyInfo);
 	                return ValidationResult.VALID;
 	            }
@@ -137,10 +136,10 @@ public class HolderOfKeySubjectConfirmationValidator extends AbstractSubjectConf
      *
      */
     protected List<KeyInfo> getSubjectConfirmationKeyInformation(SubjectConfirmation confirmation, Assertion assertion,
-            ValidationContext context) throws ValidationException {
+            ValidationContext context) throws Exception {
         SubjectConfirmationData confirmationData = confirmation.getSubjectConfirmationData();
 
-        List<KeyInfo> keyInfos = new LazyList<KeyInfo>();
+        List<KeyInfo> keyInfos = new ArrayList<KeyInfo>();
         for (XMLObject object : confirmationData.getUnknownXMLObjects()) {
             if (object != null && object.getElementQName().equals(KeyInfo.DEFAULT_ELEMENT_NAME)) {
             	keyInfos.add((KeyInfo) object);
@@ -187,7 +186,7 @@ public class HolderOfKeySubjectConfirmationValidator extends AbstractSubjectConf
     	                    PRESENTER_CERT_PARAM, X509Certificate.class.getName()));
     	        }
     	
-    	        return new Pair<PublicKey, X509Certificate>(presenterKey, presenterCert);
+    	        return Pair.of(presenterKey, presenterCert);
     	    }
     	    /**
     	         * Checks to see if the DSA or RSA key (depending on what is used in the certificate) matches one of the keys in the
