@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.joda.time.DateTime;
 import org.joda.time.chrono.ISOChronology;
+import java.time.Instant;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.SubjectConfirmation;
 import org.opensaml.saml.saml2.core.SubjectConfirmationData;
@@ -76,7 +77,8 @@ public abstract class AbstractSubjectConfirmationValidator {
 	    protected ValidationResult validateNotBefore(SubjectConfirmation confirmation, Assertion assertion,
 	            ValidationContext context) {
 	        DateTime skewedNow = new DateTime(ISOChronology.getInstanceUTC()).plus(getClockSkew(context));
-	        DateTime notBefore = confirmation.getSubjectConfirmationData().getNotBefore();
+	        Instant notBeforeInstant = confirmation.getSubjectConfirmationData().getNotBefore();
+        DateTime notBefore = notBeforeInstant != null ? new DateTime(notBeforeInstant.toEpochMilli()) : null;
 	        
 	       
 	        if (notBefore != null && notBefore.isAfter(skewedNow)) {
@@ -126,7 +128,8 @@ public abstract class AbstractSubjectConfirmationValidator {
 	    protected ValidationResult validateNotOnOrAfter(SubjectConfirmation confirmation, Assertion assertion,
 	            ValidationContext context) {
 	        DateTime skewedNow = new DateTime(ISOChronology.getInstanceUTC()).minus(getClockSkew(context));
-	        DateTime notOnOrAfter = confirmation.getSubjectConfirmationData().getNotOnOrAfter();
+	        Instant notOnOrAfterInstant = confirmation.getSubjectConfirmationData().getNotOnOrAfter();
+        DateTime notOnOrAfter = notOnOrAfterInstant != null ? new DateTime(notOnOrAfterInstant.toEpochMilli()) : null;
 	        
 	       
 	        if (notOnOrAfter != null && notOnOrAfter.isBefore(skewedNow)) {
@@ -248,5 +251,5 @@ public abstract class AbstractSubjectConfirmationValidator {
 	     * @throws ValidationException thrown if further validation finds the confirmation method to be invalid
 	     */
 	    protected abstract ValidationResult doValidate(SubjectConfirmation confirmation, Assertion assertion,
-	            ValidationContext context) throws ValidationException;
+	            ValidationContext context) throws Exception;
 }

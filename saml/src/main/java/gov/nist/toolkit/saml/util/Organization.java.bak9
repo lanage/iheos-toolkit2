@@ -10,13 +10,17 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.opensaml.saml2.metadata.provider.ChainingMetadataProvider;
-import org.opensaml.saml2.metadata.provider.FilesystemMetadataProvider;
-import org.opensaml.saml2.metadata.provider.HTTPMetadataProvider;
-import org.opensaml.saml2.metadata.provider.MetadataProvider;
-import org.opensaml.saml2.metadata.provider.MetadataProviderException;
-import org.opensaml.xml.parse.BasicParserPool;
-import org.opensaml.xml.parse.ParserPool;
+// OpenSAML 4.0.1 metadata resolver imports
+import org.opensaml.saml.metadata.resolver.MetadataResolver;
+import org.opensaml.saml.metadata.resolver.impl.ChainingMetadataResolver;
+import org.opensaml.saml.metadata.resolver.impl.HTTPMetadataResolver;
+import org.opensaml.saml.metadata.resolver.impl.FilesystemMetadataResolver;
+import org.opensaml.core.xml.io.UnmarshallingException;
+import net.shibboleth.utilities.java.support.xml.BasicParserPool;
+import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.client.HttpClient;
+import java.util.Timer;
 /**
  * @author Srinivasarao.Eadara
  *
@@ -158,40 +162,41 @@ public class Organization implements Serializable
 	 	     * for this organization or NULL when no metadata is available.
 	 	     * @throws OAException If metadata is invalid or could not be accessed
 	 	     */
-	 	    public MetadataProvider getMetadataProvider() throws Exception{
-	 	        ChainingMetadataProvider chainingMetadataProvider = null;
+	 	    public MetadataResolver getMetadataProvider() throws Exception{
+	 	        ChainingMetadataResolver chainingMetadataResolver = null;
 	 	       
 	 	        try{
 	 	            BasicParserPool parserPool = new BasicParserPool();
 	 	            parserPool.setNamespaceAware(true);
+	            parserPool.initialize();
 	 	           
-	 	            List<MetadataProvider> listMetadataProviders =
-	 	                new Vector<MetadataProvider>();
+	 	            List<MetadataResolver> listMetadataResolvers =
+	 	                new Vector<MetadataResolver>();
 	 	           
-	 	            MetadataProvider mpFile = createFileMetadataProvider(_sMetadataFile,
+	 	            MetadataResolver mpFile = createFileMetadataResolver(_sMetadataFile,
 	 	                parserPool);
 	 	            if (mpFile != null)
-	 	                listMetadataProviders.add(mpFile);
+	 	                listMetadataResolvers.add(mpFile);
 	 	           
-	 	            MetadataProvider mpHttp = createHTTPMetadataProvider(_sMetadataURL,
+	 	            MetadataResolver mpHttp = createHTTPMetadataResolver(_sMetadataURL,
 	 	                _iMetadataTimeout, parserPool);
 	 	            if (mpHttp != null)
-	 	                listMetadataProviders.add(mpHttp);
+	 	                listMetadataResolvers.add(mpHttp);
 	 	           
-	 	            if (!listMetadataProviders.isEmpty()){
-	 	                chainingMetadataProvider = new ChainingMetadataProvider();
-	 	                chainingMetadataProvider.setProviders(listMetadataProviders);
+	 	            if (!listMetadataResolvers.isEmpty()){
+	 	                chainingMetadataResolver = new ChainingMetadataResolver();
+	 	                chainingMetadataResolver.setResolvers(listMetadataResolvers);
 	 	            }
 	 	        }
 	 	        catch (Exception e){
 	 	            _logger.log(Level.SEVERE, "Internal error while creating metadata providers", e);
 	 	            throw new Exception("Internal error while creating metadata providers");
 	 	        }
-	 	        return chainingMetadataProvider;
+	 	        return chainingMetadataResolver;
 	 	    }
 	 	
-	 	    private HTTPMetadataProvider createHTTPMetadataProvider(String sMetadataURL,
-	 	        int iMetadataTimeout, ParserPool parserPool)
+	 	    private HTTPMetadataResolver createHTTPMetadataResolver(String sMetadataURL,
+	 	        int iMetadataTimeout, BasicParserPool parserPool)
 	 	        throws Exception{
 	 	        HTTPMetadataProvider urlProvider = null;
 	 	       

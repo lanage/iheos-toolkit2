@@ -11,19 +11,14 @@ import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.opensaml.common.xml.SAMLConstants;
-import org.opensaml.saml2.core.Attribute;
-import org.opensaml.saml2.core.AttributeStatement;
-import org.opensaml.saml2.core.AttributeValue;
-import org.opensaml.saml2.core.impl.AttributeBuilder;
-import org.opensaml.xml.Namespace;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.parse.BasicParserPool;
-import org.opensaml.xml.schema.XSAny;
-import org.opensaml.xml.schema.XSString;
-import org.opensaml.xml.schema.impl.XSAnyBuilder;
-import org.opensaml.xml.util.XMLConstants;
-import org.opensaml.xml.util.XMLHelper;
+import org.opensaml.saml.saml2.core.Attribute;
+import org.opensaml.saml.saml2.core.AttributeStatement;
+import org.opensaml.core.xml.schema.XSString;
+import org.opensaml.saml.saml2.core.impl.AttributeBuilder;
+import org.opensaml.core.xml.Namespace;
+import org.opensaml.core.xml.XMLObject;
+import org.opensaml.core.xml.schema.XSAny;
+import org.opensaml.core.xml.schema.impl.XSAnyBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -33,12 +28,14 @@ public class AttributeUtil extends SamlConstants {
 	public static final String VERSION = "$Id: AttributeUtil.java 2950 2008-05-28 08:22:34Z jre $";
 
 
-	protected static BasicParserPool parser = new BasicParserPool();
+	// Note: BasicParserPool needs to be updated for OpenSAML 4.0.1
+	// For now, using standard DocumentBuilderFactory
+	protected static DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 
 	/** Default atrributes for AttributeValue */
-	public static final QName XSI_TYPE_ATTRIBUTE_NAME = new QName(XMLConstants.XSI_NS, "type", XMLConstants.XSI_PREFIX);
+	public static final QName XSI_TYPE_ATTRIBUTE_NAME = new QName(javax.xml.XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI, "type", "xsi");
 
-	public static final String XS_STRING = XMLConstants.XSD_PREFIX + ":" + XSString.TYPE_LOCAL_NAME;
+	public static final String XS_STRING = "xsd:" + XSString.TYPE_LOCAL_NAME;
 
 	/** QName for the attribute resource */
 	public static Attribute createAttribute(String name, String friendlyName,String nameFormat) {
@@ -51,9 +48,9 @@ public class AttributeUtil extends SamlConstants {
 
 	private static XSAny createAttributeValue() {
 		XSAnyBuilder builder = new XSAnyBuilder();
-		XSAny ep = builder.buildObject(SAMLConstants.SAML20_NS,
-										AttributeValue.DEFAULT_ELEMENT_LOCAL_NAME,
-										SAMLConstants.SAML20_PREFIX);
+		XSAny ep = builder.buildObject("urn:oasis:names:tc:SAML:2.0:assertion",
+										"AttributeValue",
+										"saml");
 		return ep;
 	}
 
@@ -62,7 +59,6 @@ public class AttributeUtil extends SamlConstants {
 		ep.setTextContent(String.valueOf(value));
 		ep.getUnknownAttributes().put(XSI_TYPE_ATTRIBUTE_NAME, type);
 		
-		ep.addNamespace(new Namespace(XMLConstants.XSI_NS, XMLConstants.XSI_PREFIX));
 		return ep;
 	}
 
@@ -262,18 +258,18 @@ public class AttributeUtil extends SamlConstants {
 		for (int i = 0; i < attribute.getAttributeValues().size(); i++) {
 			if (attribute.getAttributeValues().get(i) instanceof XSString) {
 				XSString str = (XSString) attribute.getAttributeValues().get(i);
-				if (AttributeValue.DEFAULT_ELEMENT_LOCAL_NAME.equals(str.getElementQName().getLocalPart())
-						&& SAMLConstants.SAML20_NS.equals(str.getElementQName().getNamespaceURI())) {
+				if ("AttributeValue".equals(str.getElementQName().getLocalPart())
+						&& "urn:oasis:names:tc:SAML:2.0:assertion".equals(str.getElementQName().getNamespaceURI())) {
 					return str.getValue();
 				}
 			} else {
 				XSAny ep = (XSAny) attribute.getAttributeValues().get(i);
-				if (AttributeValue.DEFAULT_ELEMENT_LOCAL_NAME.equals(ep.getElementQName().getLocalPart())
-						&& SAMLConstants.SAML20_NS.equals(ep.getElementQName().getNamespaceURI())) {
+				if ("AttributeValue".equals(ep.getElementQName().getLocalPart())
+						&& "urn:oasis:names:tc:SAML:2.0:assertion".equals(ep.getElementQName().getNamespaceURI())) {
 					if (ep.getUnknownXMLObjects().size() > 0) {
 						StringBuilder res = new StringBuilder();
 						for (XMLObject obj : ep.getUnknownXMLObjects()) {
-							res.append(XMLHelper.nodeToString(SamlUtil.marshallObject(obj)));
+							res.append(SamlUtil.marshallObject(obj).getTextContent());
 						}
 						return res.toString();
 					}
@@ -296,18 +292,18 @@ public class AttributeUtil extends SamlConstants {
 		for (int i = 0; i < attribute.getAttributeValues().size(); i++) {
 			if (attribute.getAttributeValues().get(i) instanceof XSString) {
 				XSString str = (XSString) attribute.getAttributeValues().get(i);
-				if (AttributeValue.DEFAULT_ELEMENT_LOCAL_NAME.equals(str.getElementQName().getLocalPart())
-						&& SAMLConstants.SAML20_NS.equals(str.getElementQName().getNamespaceURI())) {
+				if ("AttributeValue".equals(str.getElementQName().getLocalPart())
+						&& "urn:oasis:names:tc:SAML:2.0:assertion".equals(str.getElementQName().getNamespaceURI())) {
 					values.add(str.getValue());
 				}
 			} else {
 				XSAny ep = (XSAny) attribute.getAttributeValues().get(i);
-				if (AttributeValue.DEFAULT_ELEMENT_LOCAL_NAME.equals(ep.getElementQName().getLocalPart())
-						&& SAMLConstants.SAML20_NS.equals(ep.getElementQName().getNamespaceURI())) {
+				if ("AttributeValue".equals(ep.getElementQName().getLocalPart())
+						&& "urn:oasis:names:tc:SAML:2.0:assertion".equals(ep.getElementQName().getNamespaceURI())) {
 					if (ep.getUnknownXMLObjects().size() > 0) {
 						StringBuilder res = new StringBuilder();
 						for (XMLObject obj : ep.getUnknownXMLObjects()) {
-							res.append(XMLHelper.nodeToString(SamlUtil.marshallObject(obj)));
+							res.append(SamlUtil.marshallObject(obj).getTextContent());
 						}
 						values.add(res.toString());
 					}

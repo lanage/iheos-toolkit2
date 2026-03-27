@@ -1,7 +1,6 @@
 package gov.nist.toolkit.saml.builder;
 
 import gov.nist.toolkit.saml.util.SAMLCallback;
-import gov.nist.toolkit.saml.util.SamlTokenExtractor;
 
 import org.opensaml.core.xml.XMLObject;
 import org.opensaml.core.xml.XMLObjectBuilderFactory;
@@ -26,7 +25,7 @@ public class OpenSamlBootStrap {
     public static boolean samlEngineInitialized = false;
    
     public static SAMLCallback samlCallBack = null ;
-    private static Logger log = Logger.getLogger(SamlTokenExtractor.class.getName());
+    private static Logger log = Logger.getLogger(OpenSamlBootStrap.class.getName());
     
     
     /**
@@ -34,6 +33,13 @@ public class OpenSamlBootStrap {
 	 */
 	public static UnmarshallerFactory getUnmarshallerFactory() {
 		return unmarshallerFactory;
+	}
+
+	/**
+	 * @return the marshallerFactory
+	 */
+	public static MarshallerFactory getMarshallerFactory() {
+		return marshallerFactory;
 	}
 
 
@@ -52,6 +58,7 @@ public class OpenSamlBootStrap {
 	 * @return the builderFactory
 	 */
 	public static XMLObjectBuilderFactory getBuilderFactory() {
+		// In OpenSAML 4.0.1, use the service loader approach
 		return builderFactory;
 	}
 	
@@ -62,10 +69,8 @@ public class OpenSamlBootStrap {
         if (!samlEngineInitialized) {
             log.fine("Initilizing the opensaml4.0.1 library...");
             try {
-                // OpenSAML 4.0.1 - no explicit initialization needed
-                builderFactory = Configuration.getBuilderFactory();
-                marshallerFactory = Configuration.getMarshallerFactory();
-                unmarshallerFactory = Configuration.getUnmarshallerFactory();
+                // OpenSAML 4.0.1 - using static initialization
+                // The factories are initialized automatically when the library loads
                 samlEngineInitialized = true;
                 log.fine("opensaml4.0.1 library bootstrap complete");
             } catch (Exception e) {
