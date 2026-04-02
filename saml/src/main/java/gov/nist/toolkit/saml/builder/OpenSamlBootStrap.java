@@ -67,12 +67,20 @@ public class OpenSamlBootStrap {
      */
     public synchronized static void initSamlEngine() {
         if (!samlEngineInitialized) {
-            log.fine("Initilizing the opensaml4.0.1 library...");
+            log.fine("Initializing the opensaml4.0.1 library...");
             try {
-                // OpenSAML 4.0.1 - using static initialization
-                // The factories are initialized automatically when the library loads
-                samlEngineInitialized = true;
-                log.fine("opensaml4.0.1 library bootstrap complete");
+                // OpenSAML 4.0.1 - use service loader approach
+                // The XMLObjectProviderRegistrySupport automatically loads providers via service loader
+                builderFactory = org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport.getBuilderFactory();
+                marshallerFactory = org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport.getMarshallerFactory();
+                unmarshallerFactory = org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport.getUnmarshallerFactory();
+                
+                if (builderFactory != null && marshallerFactory != null && unmarshallerFactory != null) {
+                    samlEngineInitialized = true;
+                    log.fine("opensaml4.0.1 library bootstrap complete");
+                } else {
+                    log.warning("opensaml4.0.1 library bootstrap incomplete - some factories are null");
+                }
             } catch (Exception e) {
                 log.log(Level.SEVERE,
                     "Unable to bootstrap the opensaml4.0.1 library - all SAML operations will fail", 
