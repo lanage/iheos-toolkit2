@@ -18,6 +18,7 @@ import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.xmlsec.signature.X509Data;
 
 import javax.xml.namespace.QName;
+import gov.nist.toolkit.saml.util.KeyInfoHelper401;
 
 public class HolderOfKeySubjectConfirmationValidator extends AbstractSubjectConfirmationValidator {
 
@@ -261,9 +262,12 @@ public class HolderOfKeySubjectConfirmationValidator extends AbstractSubjectConf
                 for (KeyValue keyValue : keyValues) {
                     DSAKeyValue dsaKeyValue = keyValue.getDSAKeyValue();
                     if (dsaKeyValue != null) {
-                        System.out.println("Found DSAKeyValue - basic match (full comparison not implemented)");
-                        // In production, implement proper DSA key comparison
-                        return true;
+                        // ✅ REAL CRYPTOGRAPHIC COMPARISON!
+                        PublicKey extractedKey = KeyInfoHelper401.getDSAKey(dsaKeyValue);
+                        if (KeyInfoHelper401.keysEqual(key, extractedKey)) {
+                            System.out.println("✓ Matched DSAKeyValue - cryptographic comparison successful");
+                            return true;
+                        }
                     }
                 }
             }
@@ -272,14 +276,19 @@ public class HolderOfKeySubjectConfirmationValidator extends AbstractSubjectConf
                 for (KeyValue keyValue : keyValues) {
                     RSAKeyValue rsaKeyValue = keyValue.getRSAKeyValue();
                     if (rsaKeyValue != null) {
-                        System.out.println("Found RSAKeyValue - basic match (full comparison not implemented)");
-                        // In production, implement proper RSA key comparison
-                        return true;
+                        // ✅ REAL CRYPTOGRAPHIC COMPARISON!
+                        PublicKey extractedKey = KeyInfoHelper401.getRSAKey(rsaKeyValue);
+                        if (KeyInfoHelper401.keysEqual(key, extractedKey)) {
+                            System.out.println("✓ Matched RSAKeyValue - cryptographic comparison successful");
+                            return true;
+                        }
                     }
                 }
             }
+        } catch (KeyException e) {
+            System.out.println("KeyInfo contained key value that cannot be parsed: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Error during key matching: " + e.getMessage());
+            System.out.println("Error during cryptographic key matching: " + e.getMessage());
         }
         
         return false;
@@ -303,8 +312,10 @@ public class HolderOfKeySubjectConfirmationValidator extends AbstractSubjectConf
                     List<org.opensaml.xmlsec.signature.X509Certificate> xmlCertificates = data.getX509Certificates();
                     if (xmlCertificates != null && !xmlCertificates.isEmpty()) {
                         for (org.opensaml.xmlsec.signature.X509Certificate xmlCertificate : xmlCertificates) {
-                            if (cert.equals(xmlCertificate.getValue())) {
-                                System.out.println("Certificate match found in X509Data");
+                            // ✅ REAL CRYPTOGRAPHIC COMPARISON!
+                            X509Certificate extractedCert = KeyInfoHelper401.getCertificate(xmlCertificate);
+                            if (cert.equals(extractedCert)) {
+                                System.out.println("✓ Matched X509Certificate - cryptographic comparison successful");
                                 return true;
                             }
                         }
@@ -312,20 +323,35 @@ public class HolderOfKeySubjectConfirmationValidator extends AbstractSubjectConf
                 }
             }
             
-            // Check for KeyValue in KeyInfo (as fallback)
+            // Check for KeyValue in KeyInfo (as fallback - compare certificate's public key)
             List<KeyValue> keyValues = keyInfo.getKeyValues();
             if (keyValues != null && !keyValues.isEmpty()) {
-                System.out.println("Found KeyValue in KeyInfo, attempting key match");
+                System.out.println("Found KeyValue in KeyInfo, attempting certificate-to-key match");
                 
                 for (KeyValue keyValue : keyValues) {
-                    if (keyValue.getDSAKeyValue() != null || keyValue.getRSAKeyValue() != null) {
-                        System.out.println("Found KeyValue (DSA or RSA) - basic certificate validation");
-                        // In production, implement proper certificate-to-key comparison
-                        return true;
+                    if (keyValue.getDSAKeyValue() != null) {
+                        // ✅ REAL CRYPTOGRAPHIC COMPARISON!
+                        PublicKey extractedKey = KeyInfoHelper401.getDSAKey(keyValue.getDSAKeyValue());
+                        if (KeyInfoHelper401.keysEqual(cert.getPublicKey(), extractedKey)) {
+                            System.out.println("✓ Matched certificate to DSAKeyValue - cryptographic comparison successful");
+                            return true;
+                        }
+                    }
+                    if (keyValue.getRSAKeyValue() != null) {
+                        // ✅ REAL CRYPTOGRAPHIC COMPARISON!
+                        PublicKey extractedKey = KeyInfoHelper401.getRSAKey(keyValue.getRSAKeyValue());
+                        if (KeyInfoHelper401.keysEqual(cert.getPublicKey(), extractedKey)) {
+                            System.out.println("✓ Matched certificate to RSAKeyValue - cryptographic comparison successful");
+                            return true;
+                        }
                     }
                 }
             }
             
+        } catch (java.security.cert.CertificateException e) {
+            System.out.println("KeyInfo contained certificate value that cannot be parsed: " + e.getMessage());
+        } catch (KeyException e) {
+            System.out.println("KeyInfo contained key value that cannot be parsed: " + e.getMessage());
         } catch (Exception e) {
             System.out.println("Error during certificate matching: " + e.getMessage());
         }
