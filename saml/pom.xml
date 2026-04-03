@@ -43,33 +43,33 @@
         </dependency>
         <dependency>
             <groupId>org.opensaml</groupId>
-            <artifactId>opensaml-core</artifactId>
-            <version>4.0.1</version>
+            <artifactId>opensaml-core-api</artifactId>
+            <version>5.1.4</version>
         </dependency>
         <dependency>
-            <groupId>org.opensAML</groupId>
+            <groupId>org.opensaml</groupId>
             <artifactId>opensaml-saml-api</artifactId>
-            <version>4.0.1</version>
+            <version>5.1.4</version>
         </dependency>
         <dependency>
-            <groupId>org.opensAML</groupId>
+            <groupId>org.opensaml</groupId>
             <artifactId>opensaml-saml-impl</artifactId>
-            <version>4.0.1</version>
+            <version>5.1.4</version>
         </dependency>
         <dependency>
-            <groupId>org.opensAML</groupId>
+            <groupId>org.opensaml</groupId>
             <artifactId>opensaml-xmlsec-impl</artifactId>
-            <version>4.0.1</version>
+            <version>5.1.4</version>
         </dependency>
         <dependency>
-            <groupId>org.opensAML</groupId>
+            <groupId>org.opensaml</groupId>
             <artifactId>opensaml-security-api</artifactId>
-            <version>4.0.1</version>
+            <version>5.1.4</version>
         </dependency>
         <dependency>
-            <groupId>org.opensAML</groupId>
+            <groupId>org.opensaml</groupId>
             <artifactId>opensaml-security-impl</artifactId>
-            <version>4.0.1</version>
+            <version>5.1.4</version>
         </dependency>
         <dependency>
             <groupId>joda-time</groupId>

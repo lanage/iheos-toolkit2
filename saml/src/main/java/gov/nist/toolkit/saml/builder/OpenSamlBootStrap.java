@@ -8,6 +8,8 @@ import org.opensaml.core.xml.io.MarshallerFactory;
 import org.opensaml.core.xml.io.Unmarshaller;
 import org.opensaml.core.xml.io.UnmarshallerFactory;
 import org.opensaml.core.config.Configuration;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistry;
+import org.opensaml.core.impl.config.XMLObjectProviderRegistrySupport;
 import org.opensaml.saml.saml2.core.Assertion;
 
 
@@ -67,23 +69,22 @@ public class OpenSamlBootStrap {
      */
     public synchronized static void initSamlEngine() {
         if (!samlEngineInitialized) {
-            log.fine("Initializing the opensaml4.0.1 library...");
+            log.fine("Initializing the opensaml5.1.4 library...");
             try {
-                // OpenSAML 4.0.1 - use service loader approach
-                // The XMLObjectProviderRegistrySupport automatically loads providers via service loader
-                builderFactory = org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport.getBuilderFactory();
-                marshallerFactory = org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport.getMarshallerFactory();
-                unmarshallerFactory = org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport.getUnmarshallerFactory();
+                // OpenSAML 5.1.4 - use XMLObjectProviderRegistrySupport
+                builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
+                marshallerFactory = XMLObjectProviderRegistrySupport.getMarshallerFactory();
+                unmarshallerFactory = XMLObjectProviderRegistrySupport.getUnmarshallerFactory();
                 
                 if (builderFactory != null && marshallerFactory != null && unmarshallerFactory != null) {
                     samlEngineInitialized = true;
-                    log.fine("opensaml4.0.1 library bootstrap complete");
+                    log.fine("opensaml5.1.4 library bootstrap complete");
                 } else {
-                    log.warning("opensaml4.0.1 library bootstrap incomplete - some factories are null");
+                    log.warning("opensaml5.1.4 library bootstrap incomplete - some factories are null");
                 }
             } catch (Exception e) {
                 log.log(Level.SEVERE,
-                    "Unable to bootstrap the opensaml4.0.1 library - all SAML operations will fail", 
+                    "Unable to bootstrap the opensaml5.1.4 library - all SAML operations will fail", 
                     e
                 );
             }

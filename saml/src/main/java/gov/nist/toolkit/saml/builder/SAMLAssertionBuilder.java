@@ -192,7 +192,7 @@ public class SAMLAssertionBuilder {
                 authnStatement.setSubjectLocality(subjectLocality);
                 
                 AuthnContextClassRef authnContextClassRef = authnContextClassRefBuilder.buildObject();
-                authnContextClassRef.setAuthnContextClassRef(
+                authnContextClassRef.setURI(
                     transformAuthenticationMethod(statementBean.getAuthenticationMethod())
                 );
                 AuthnContext authnContext = authnContextBuilder.buildObject();
@@ -637,7 +637,7 @@ public class SAMLAssertionBuilder {
         }
         Action actionElement = actionElementBuilder.buildObject();
         actionElement.setNamespace(actionBean.getActionNamespace());
-        actionElement.setAction(actionBean.getContents());
+        actionElement.setValue(actionBean.getContents());
 
         return actionElement;
     }
@@ -727,7 +727,7 @@ public class SAMLAssertionBuilder {
        
         AudienceRestriction audienceRestriction = audienceRestrictionBuilder.buildObject();
         Audience audience = audienceBuilder.buildObject();
-        audience.setAudienceURI(audienceURI);
+        audience.setURI(audienceURI);
         audienceRestriction.getAudiences().add(audience);
         return audienceRestriction;
     }
