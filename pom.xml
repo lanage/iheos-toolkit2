@@ -73,7 +73,7 @@
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk15on</artifactId>
-                <version>1.60</version>
+                <version>1.60</version> <!-- REVERTED: 1.69 breaks OpenSAML 4.0.1, will upgrade with OpenSAML 5.1.4 -->
             </dependency>
             <dependency>
                 <groupId>org.owasp.esapi</groupId>

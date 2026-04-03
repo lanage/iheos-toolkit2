@@ -10,6 +10,20 @@
 
     <artifactId>saml</artifactId>
 
+    <repositories>
+        <repository>
+            <id>shibboleth-releases</id>
+            <name>Shibboleth Releases Repository</name>
+            <url>https://build.shibboleth.net/maven/releases/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>gov.nist.toolkit</groupId>
@@ -33,27 +47,27 @@
             <version>4.0.1</version>
         </dependency>
         <dependency>
-            <groupId>org.opensaml</groupId>
+            <groupId>org.opensAML</groupId>
             <artifactId>opensaml-saml-api</artifactId>
             <version>4.0.1</version>
         </dependency>
         <dependency>
-            <groupId>org.opensaml</groupId>
+            <groupId>org.opensAML</groupId>
             <artifactId>opensaml-saml-impl</artifactId>
             <version>4.0.1</version>
         </dependency>
         <dependency>
-            <groupId>org.opensaml</groupId>
+            <groupId>org.opensAML</groupId>
             <artifactId>opensaml-xmlsec-impl</artifactId>
             <version>4.0.1</version>
         </dependency>
         <dependency>
-            <groupId>org.opensaml</groupId>
+            <groupId>org.opensAML</groupId>
             <artifactId>opensaml-security-api</artifactId>
             <version>4.0.1</version>
         </dependency>
         <dependency>
-            <groupId>org.opensaml</groupId>
+            <groupId>org.opensAML</groupId>
             <artifactId>opensaml-security-impl</artifactId>
             <version>4.0.1</version>
         </dependency>
