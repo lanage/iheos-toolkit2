@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 
 // OpenSAML 4.0.1 metadata resolver imports
 import org.opensaml.saml.metadata.resolver.MetadataResolver;
-import org.opensaml.saml.metadata.resolver.impl.ChainingMetadataResolver;
 import org.opensaml.saml.metadata.resolver.impl.HTTPMetadataResolver;
 import org.opensaml.saml.metadata.resolver.impl.FilesystemMetadataResolver;
 import org.opensaml.core.xml.io.UnmarshallingException;
@@ -163,7 +162,7 @@ public class Organization implements Serializable
 	 	     * @throws OAException If metadata is invalid or could not be accessed
 	 	     */
 	 	    public MetadataResolver getMetadataProvider() throws Exception{
-	 	        ChainingMetadataResolver chainingMetadataResolver = null;
+	 	        MetadataResolver metadataResolver = null;
 	 	       
 	 	        try{
 	 	            BasicParserPool parserPool = new BasicParserPool();
