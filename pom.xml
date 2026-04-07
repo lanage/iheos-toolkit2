@@ -238,8 +238,8 @@
                 <version>${mavenCompilerPluginVersion}</version>
                 <configuration>
                     <compilerId>groovy-eclipse-compiler</compilerId>
-                    <source>8</source>
-                    <target>8</target>
+                    <source>17</source>
+                    <target>17</target>
                     <compilerArgument>-Xms1024m -Xmx1024m -XX:MaxPermSize=256m --add-exports=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED	--add-exports=jdk.unsupported/sun.misc=ALL-UNNAMED</compilerArgument>
                 </configuration>
                 <dependencies>
