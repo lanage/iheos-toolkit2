@@ -14,7 +14,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <jdk.version>11</jdk.version>
+        <jdk.version>17</jdk.version>
         <junit.version>4.11</junit.version>
         <!-- https://eclipse-ee4j.github.io/jersey.github.io/release-notes/2.26.html   -->
         <jersey.version>2.46</jersey.version> <!-- SECURITY FIX: 2.33 → 2.46 to fix race condition (CVE SNYK-JAVA-ORGGLASSFISHJERSEYCORE-14049172) - Compatible with OpenSAML 5.1.4 -->
@@ -31,7 +31,7 @@
         <jackson.version>[2.9.10.1,)</jackson.version>
          -->
         <!--
-        These versions does not work with IntelliJ/Jetty/Windows
+        These versions do not work with IntelliJ/Jetty/Windows
             <groovyVersion>2.5.0-beta-2</groovyVersion>
             <groovyVersion>2.6.0-alpha-2</groovyVersion>
         -->
@@ -201,11 +201,23 @@
                 <groupId>gov.nist.toolkit</groupId>
                 <artifactId>toolkit-services-common</artifactId>
                 <version>7.12.0</version><!-- xdstk -->
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>gov.nist.toolkit</groupId>
                 <artifactId>toolkit-api</artifactId>
                 <version>7.12.0</version><!-- xdstk -->
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>gov.nist.toolkit</groupId>
@@ -494,7 +506,7 @@
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.15</version> <!-- SECURITY FIX: 1.9 → 1.15 to fix OpenSAML 5.1.4 compatibility (NoSuchMethodError: decodeHex) - Compatible with OpenSAML 5.1.4 -->
+                <version>1.16.1</version> <!-- SECURITY FIX: 1.9 → 1.16.1 to fix OpenSAML 5.1.4 compatibility (NoSuchMethodError: decodeHex) - Compatible with OpenSAML 5.1.4 -->
             </dependency>
             <dependency>
                 <groupId>xmlpull</groupId>
@@ -555,6 +567,12 @@
                 <groupId>org.glassfish.jersey.media</groupId>
                 <artifactId>jersey-media-json-jackson</artifactId>
                 <version>${jersey.version}</version>    <!-- 2.22.1  -->
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
 
@@ -936,7 +954,7 @@
 
             <!--
             If you are using HAPI narrative generation, you will need to include Thymeleaf
-            as well. Otherwise the following can be omitted.
+            as well, otherwise the following can be omitted.
             -->
             <!--            <dependency>-->
             <!--                <groupId>org.thymeleaf</groupId>-->
