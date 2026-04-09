@@ -98,6 +98,8 @@
         <maven-release-plugin.version>2.5.1</maven-release-plugin.version>
         <maven-war-plugin.version>3.3.1</maven-war-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.2</nexus-staging-maven-plugin.version>
+        <maven.version>3.9.14</maven.version>
+        <!-- Updated to use Maven 3.9.14 from scoop installation -->
 <!--        <tomcat7-maven-plugin.version>2.2</tomcat7-maven-plugin.version>-->
         <!--<axis2-version>1.7.9</axis2-version>-->
         <axis2-version>1.8.2</axis2-version>

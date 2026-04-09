@@ -541,6 +541,8 @@
 					<!-- Use Style for source formatting in the web browser. -->
 					<style>OBFUSCATED</style>
 <!--                    <style>DETAILED</style>-->
+					<!-- compileSourcesArtifacts deprecated - removed -->
+					<!-- compileSourcesArtifact entries reverted to original format -->
 					<compileSourcesArtifacts>
 						<compileSourcesArtifact>${project.groupId}:installation</compileSourcesArtifact>
 						<compileSourcesArtifact>${project.groupId}:tk</compileSourcesArtifact>
