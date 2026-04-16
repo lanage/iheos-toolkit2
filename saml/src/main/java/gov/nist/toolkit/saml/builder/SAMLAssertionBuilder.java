@@ -24,6 +24,7 @@ import org.opensaml.saml.common.SAMLVersion;
 import org.opensaml.saml.saml2.core.*;
 import org.opensaml.core.config.Configuration;
 import org.opensaml.xmlsec.signature.KeyInfo;
+import org.opensaml.security.credential.BasicX509Credential;
 import org.w3c.dom.Element;
 
 import javax.xml.crypto.dsig.CanonicalizationMethod;
@@ -435,12 +436,32 @@ public class SAMLAssertionBuilder {
         if (keyInfo.getElement() != null) {
             return (KeyInfo)fromDom(keyInfo.getElement());
         } else {
-            // Create a basic KeyInfo element
-            KeyInfo keyInfoElement = (KeyInfo) builderFactory.getBuilder(KeyInfo.DEFAULT_ELEMENT_NAME).buildObject(KeyInfo.DEFAULT_ELEMENT_NAME);
+            // Set the certificate or public key
+            BasicX509Credential keyInfoCredential = new BasicX509Credential();
+            if (keyInfo.getCertificate() != null) {
+                keyInfoCredential.setEntityCertificate(keyInfo.getCertificate());
+            } else if (keyInfo.getPublicKey() != null) {
+                keyInfoCredential.setPublicKey(keyInfo.getPublicKey());
+            }
             
-            // For OpenSAML 4.0.1, we'll create a simple KeyInfo
-            // The complex credential handling would need to be reimplemented
-            return keyInfoElement;
+            // Configure how to emit the certificate using OpenSAML 5.1.4 API
+            org.opensaml.xmlsec.signature.support.X509KeyInfoGeneratorFactory kiFactory = new org.opensaml.xmlsec.signature.support.X509KeyInfoGeneratorFactory();
+            KeyInfoBean.CERT_IDENTIFIER certIdentifier = keyInfo.getCertIdentifer();
+            switch (certIdentifier) {
+                case X509_CERT: {
+                    kiFactory.setEmitEntityCertificate(true);
+                    break;
+                }
+                case KEY_VALUE: {
+                    kiFactory.setEmitPublicKeyValue(true);
+                    break;
+                }
+                case X509_ISSUER_SERIAL: {
+                    kiFactory.setEmitX509IssuerSerial(true);
+                    break;
+                }
+            }
+            return kiFactory.newInstance().generate(keyInfoCredential);
         }
     }
     /**
@@ -637,7 +658,7 @@ public class SAMLAssertionBuilder {
         }
         Action actionElement = actionElementBuilder.buildObject();
         actionElement.setNamespace(actionBean.getActionNamespace());
-        actionElement.setValue(actionBean.getContents());
+        actionElement.setAction(actionBean.getContents());
 
         return actionElement;
     }
