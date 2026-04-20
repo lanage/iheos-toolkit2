@@ -10,7 +10,7 @@ import org.opensaml.core.xml.io.MarshallerFactory;
 import org.opensaml.core.xml.io.UnmarshallerFactory;
 import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
 
-import gov.nist.toolkit.saml.builder.OpenSamlBootStrap;
+import gov.nist.toolkit.saml.builder.OpenSAMLInitializer;
 
 /**
  * Simple test to verify OpenSAML 5.1.4 infrastructure is working
@@ -20,16 +20,16 @@ public class OpenSAML51InfrastructureTest {
     @Test
     @Order(1)
     @DisplayName("Test OpenSAML 5.1.4 Infrastructure")
-    public void testOpenSAMLInfrastructure() {
+    public void testOpenSAMLInfrastructure() throws Exception {
         System.out.println("--- Testing OpenSAML 5.1.4 Infrastructure ---");
         
         // Initialize OpenSAML
-        OpenSamlBootStrap.initSamlEngine();
+        OpenSAMLInitializer.ensureInitialized();
         
         // Test that factories are available
-        XMLObjectBuilderFactory builderFactory = OpenSamlBootStrap.getBuilderFactory();
-        MarshallerFactory marshallerFactory = OpenSamlBootStrap.getMarshallerFactory();
-        UnmarshallerFactory unmarshallerFactory = OpenSamlBootStrap.getUnmarshallerFactory();
+        XMLObjectBuilderFactory builderFactory = XMLObjectProviderRegistrySupport.getBuilderFactory();
+        MarshallerFactory marshallerFactory = XMLObjectProviderRegistrySupport.getMarshallerFactory();
+        UnmarshallerFactory unmarshallerFactory = XMLObjectProviderRegistrySupport.getUnmarshallerFactory();
         
         // Verify infrastructure is working
         if (builderFactory == null) {
@@ -46,8 +46,8 @@ public class OpenSAML51InfrastructureTest {
         }
         
         System.out.println("✓ OpenSAML 5.1.4 infrastructure test completed");
-        System.out.println("  - BuilderFactory: " + (builderFactory != null ? "NULL" : "OK"));
-        System.out.println("  - MarshallerFactory: " + (marshallerFactory != null ? "NULL" : "OK"));
-        System.out.println("  - UnmarshallerFactory: " + (unmarshallerFactory != null ? "NULL" : "OK"));
+        System.out.println("  - BuilderFactory: " + (builderFactory != null ? "OK" : "NULL"));
+        System.out.println("  - MarshallerFactory: " + (marshallerFactory != null ? "OK" : "NULL"));
+        System.out.println("  - UnmarshallerFactory: " + (unmarshallerFactory != null ? "OK" : "NULL"));
     }
 }
