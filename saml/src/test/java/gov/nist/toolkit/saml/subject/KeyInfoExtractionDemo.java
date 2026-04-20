@@ -1,11 +1,14 @@
 package gov.nist.toolkit.saml.subject;
 
-import gov.nist.toolkit.saml.builder.OpenSamlBootStrap;
+import gov.nist.toolkit.saml.builder.OpenSAMLInitializer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.SubjectConfirmation;
 import org.opensaml.xmlsec.signature.KeyInfo;
+import org.opensaml.core.xml.io.Unmarshaller;
+import org.opensaml.core.xml.io.UnmarshallingException;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
 
 import java.io.ByteArrayInputStream;
 import java.security.KeyPair;
@@ -23,7 +26,7 @@ public class KeyInfoExtractionDemo {
         
         try {
             // Initialize OpenSAML
-            OpenSamlBootStrap.bootstrap();
+            OpenSAMLInitializer.ensureInitializedUnchecked();
             
             // Run demonstrations
             demonstrateRSAKeyInfoExtraction();
@@ -59,7 +62,7 @@ public class KeyInfoExtractionDemo {
             System.out.println("  - KeyValue elements: " + keyInfo.getKeyValues().size());
             
             if (!keyInfo.getKeyValues().isEmpty() && keyInfo.getKeyValues().get(0).getRSAKeyValue() != null) {
-                var rsaKey = keyInfo.getKeyValues().get(0).getRSAKeyValue();
+                org.opensaml.xmlsec.signature.RSAKeyValue rsaKey = keyInfo.getKeyValues().get(0).getRSAKeyValue();
                 System.out.println("  - RSA Modulus length: " + rsaKey.getModulus().getValue().length());
                 System.out.println("  - RSA Exponent: " + rsaKey.getExponent().getValue());
             }
@@ -90,8 +93,8 @@ public class KeyInfoExtractionDemo {
             System.out.println("  - X509Data elements: " + keyInfo.getX509Datas().size());
             
             if (!keyInfo.getX509Datas().isEmpty() && !keyInfo.getX509Datas().get(0).getX509Certificates().isEmpty()) {
-                var cert = keyInfo.getX509Datas().get(0).getX509Certificates().get(0);
-                System.out.println("  - Certificate length: " + cert.getValue().length + " bytes");
+                org.opensaml.xmlsec.signature.X509Certificate cert = keyInfo.getX509Datas().get(0).getX509Certificates().get(0);
+                System.out.println("  - Certificate length: " + cert.getValue().length() + " bytes");
             }
         } else {
             System.out.println("✗ Failed to extract KeyInfo");
@@ -194,9 +197,22 @@ public class KeyInfoExtractionDemo {
         javax.xml.parsers.DocumentBuilder builder = factory.newDocumentBuilder();
         
         ByteArrayInputStream inputStream = new ByteArrayInputStream(xml.getBytes());
-        org.w3c.dom.Element documentElement = builder.parse(inputStream).getDocumentElement();
+        org.xml.sax.InputSource inputSource = new org.xml.sax.InputSource(inputStream);
+        org.w3c.dom.Element documentElement = builder.parse(inputSource).getDocumentElement();
         
-        return (Assertion) org.opensaml.core.xml.io.UnmarshallingUtil.unmarshall(documentElement);
+        Unmarshaller unmarshaller = XMLObjectProviderRegistrySupport.getUnmarshallerFactory()
+                .getUnmarshaller(documentElement);
+        
+        if (unmarshaller == null) {
+            throw new Exception("No Unmarshaller registered for element " + 
+                    documentElement.getNamespaceURI() + ":" + documentElement.getLocalName());
+        }
+        
+        try {
+            return (Assertion) unmarshaller.unmarshall(documentElement);
+        } catch (UnmarshallingException ex) {
+            throw new Exception("Error unmarshalling a SAML assertion", ex);
+        }
     }
 
     private static String createRSAAssertion() {

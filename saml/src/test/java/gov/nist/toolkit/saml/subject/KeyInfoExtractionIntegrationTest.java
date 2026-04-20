@@ -1,6 +1,6 @@
 package gov.nist.toolkit.saml.subject;
 
-import gov.nist.toolkit.saml.builder.OpenSamlBootStrap;
+import gov.nist.toolkit.saml.builder.OpenSAMLInitializer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -10,7 +10,15 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.opensaml.saml.saml2.core.Assertion;
 import org.opensaml.saml.saml2.core.SubjectConfirmation;
 import org.opensaml.xmlsec.signature.KeyInfo;
+import org.opensaml.xmlsec.signature.KeyValue;
+import org.opensaml.xmlsec.signature.RSAKeyValue;
+import org.opensaml.xmlsec.signature.X509Data;
+import org.opensaml.xmlsec.signature.X509Certificate;
+import org.opensaml.core.xml.io.Unmarshaller;
+import org.opensaml.core.xml.io.UnmarshallingException;
+import org.opensaml.core.xml.config.XMLObjectProviderRegistrySupport;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -33,7 +41,7 @@ public class KeyInfoExtractionIntegrationTest {
 
     @BeforeAll
     static void setup() {
-        OpenSamlBootStrap.bootstrap();
+        OpenSAMLInitializer.ensureInitializedUnchecked();
         System.out.println("=== KeyInfo Extraction Integration Test ===");
         System.out.println("Testing with real SAML assertion structures");
     }
@@ -88,11 +96,15 @@ public class KeyInfoExtractionIntegrationTest {
         HolderOfKeySubjectConfirmationValidator validator = new HolderOfKeySubjectConfirmationValidator();
         
         // Use reflection to access the private method
-        java.lang.reflect.Method method = HolderOfKeySubjectConfirmationValidator.class.getDeclaredMethod("getSubjectConfirmationKeyInfo", SubjectConfirmation.class);
+        java.lang.reflect.Method method = HolderOfKeySubjectConfirmationValidator.class.getDeclaredMethod("getSubjectConfirmationKeyInformation", SubjectConfirmation.class, Assertion.class, ValidationContext.class);
         method.setAccessible(true);
         
         SubjectConfirmation confirmation = assertion.getSubject().getSubjectConfirmations().get(0);
-        KeyInfo extractedKeyInfo = (KeyInfo) method.invoke(validator, confirmation);
+        java.util.Map<String, Object> staticParams = new java.util.HashMap<>();
+        ValidationContext context = new ValidationContext(staticParams);
+        @SuppressWarnings("unchecked")
+        java.util.List<KeyInfo> extractedKeyInfos = (java.util.List<KeyInfo>) method.invoke(validator, confirmation, assertion, context);
+        KeyInfo extractedKeyInfo = extractedKeyInfos.isEmpty() ? null : extractedKeyInfos.get(0);
         
         // Verify extraction
         assertNotNull(extractedKeyInfo, "KeyInfo should be extracted");
@@ -106,7 +118,11 @@ public class KeyInfoExtractionIntegrationTest {
         Assertion assertion2 = parseSAMLAssertion(assertionWithoutKeyInfo);
         
         SubjectConfirmation confirmation2 = assertion2.getSubject().getSubjectConfirmations().get(0);
-        KeyInfo extractedKeyInfo2 = (KeyInfo) method.invoke(validator, confirmation2);
+        java.util.Map<String, Object> staticParams2 = new java.util.HashMap<>();
+        ValidationContext context2 = new ValidationContext(staticParams2);
+        @SuppressWarnings("unchecked")
+        java.util.List<KeyInfo> extractedKeyInfos2 = (java.util.List<KeyInfo>) method.invoke(validator, confirmation2, assertion2, context2);
+        KeyInfo extractedKeyInfo2 = extractedKeyInfos2.isEmpty() ? null : extractedKeyInfos2.get(0);
         
         assertNull(extractedKeyInfo2, "No KeyInfo should be extracted when not present");
         System.out.println("✓ Correctly handled assertion without KeyInfo");
@@ -124,11 +140,12 @@ public class KeyInfoExtractionIntegrationTest {
         
         // Create validator and context
         HolderOfKeySubjectConfirmationValidator validator = new HolderOfKeySubjectConfirmationValidator();
-        MockValidationContext context = new MockValidationContext();
+        java.util.Map<String, Object> staticParams = new java.util.HashMap<>();
+        ValidationContext context = new ValidationContext(staticParams);
         
         // Add test key to context
         KeyPair keyPair = generateRSAKeyPair();
-        context.setStaticParameter(HolderOfKeySubjectConfirmationValidator.PRESENTER_KEY_PARAM, keyPair.getPublic());
+        staticParams.put(HolderOfKeySubjectConfirmationValidator.PRESENTER_KEY_PARAM, keyPair.getPublic());
         
         System.out.println("Generated RSA key pair for testing");
         System.out.println("  - Algorithm: " + keyPair.getPublic().getAlgorithm());
@@ -154,15 +171,17 @@ public class KeyInfoExtractionIntegrationTest {
         System.out.println("\n--- Testing Failure Scenarios ---");
         
         // Test with no presenter key
-        MockValidationContext contextNoKey = new MockValidationContext();
+        java.util.Map<String, Object> staticParamsNoKey = new java.util.HashMap<>();
+        ValidationContext contextNoKey = new ValidationContext(staticParamsNoKey);
         ValidationResult resultNoKey = (ValidationResult) method.invoke(validator, confirmation, assertion, contextNoKey);
         assertEquals(ValidationResult.INDETERMINATE, resultNoKey);
         System.out.println("✓ Correctly failed validation with no presenter key");
         
         // Test with wrong key type
-        MockValidationContext contextWrongKey = new MockValidationContext();
+        java.util.Map<String, Object> staticParamsWrongKey = new java.util.HashMap<>();
+        ValidationContext contextWrongKey = new ValidationContext(staticParamsWrongKey);
         KeyPair dsaKeyPair = generateDSAKeyPair();
-        contextWrongKey.setStaticParameter(HolderOfKeySubjectConfirmationValidator.PRESENTER_KEY_PARAM, dsaKeyPair.getPublic());
+        staticParamsWrongKey.put(HolderOfKeySubjectConfirmationValidator.PRESENTER_KEY_PARAM, dsaKeyPair.getPublic());
         
         ValidationResult resultWrongKey = (ValidationResult) method.invoke(validator, confirmation, assertion, contextWrongKey);
         assertEquals(ValidationResult.INVALID, resultWrongKey);
@@ -186,18 +205,22 @@ public class KeyInfoExtractionIntegrationTest {
         // Test KeyInfo extraction
         HolderOfKeySubjectConfirmationValidator validator = new HolderOfKeySubjectConfirmationValidator();
         
-        java.lang.reflect.Method method = HolderOfKeySubjectConfirmationValidator.class.getDeclaredMethod("getSubjectConfirmationKeyInfo", SubjectConfirmation.class);
+        java.lang.reflect.Method method = HolderOfKeySubjectConfirmationValidator.class.getDeclaredMethod("getSubjectConfirmationKeyInformation", SubjectConfirmation.class, Assertion.class, ValidationContext.class);
         method.setAccessible(true);
         
         SubjectConfirmation confirmation = assertion.getSubject().getSubjectConfirmations().get(0);
-        KeyInfo keyInfo = (KeyInfo) method.invoke(validator, confirmation);
+        java.util.Map<String, Object> staticParams = new java.util.HashMap<>();
+        ValidationContext context = new ValidationContext(staticParams);
+        @SuppressWarnings("unchecked")
+        java.util.List<KeyInfo> extractedKeyInfos = (java.util.List<KeyInfo>) method.invoke(validator, confirmation, assertion, context);
+        KeyInfo keyInfo = extractedKeyInfos.isEmpty() ? null : extractedKeyInfos.get(0);
         
         assertNotNull(keyInfo, "KeyInfo should be extracted from Gazelle assertion");
         
         // Display KeyInfo details
         if (keyInfo.getKeyValues() != null && !keyInfo.getKeyValues().isEmpty()) {
             System.out.println("✓ Found KeyValue in Gazelle assertion");
-            var keyValue = keyInfo.getKeyValues().get(0);
+            KeyValue keyValue = keyInfo.getKeyValues().get(0);
             if (keyValue.getRSAKeyValue() != null) {
                 System.out.println("  - RSA KeyInfo detected");
                 System.out.println("  - Modulus length: " + keyValue.getRSAKeyValue().getModulus().getValue().length());
@@ -206,10 +229,10 @@ public class KeyInfoExtractionIntegrationTest {
         
         if (keyInfo.getX509Datas() != null && !keyInfo.getX509Datas().isEmpty()) {
             System.out.println("✓ Found X509Data in Gazelle assertion");
-            var x509Data = keyInfo.getX509Datas().get(0);
+            X509Data x509Data = keyInfo.getX509Datas().get(0);
             if (x509Data.getX509Certificates() != null && !x509Data.getX509Certificates().isEmpty()) {
                 System.out.println("  - X509 Certificate detected");
-                System.out.println("  - Certificate length: " + x509Data.getX509Certificates().get(0).getValue().length);
+                System.out.println("  - Certificate length: " + x509Data.getX509Certificates().get(0).getValue().length());
             }
         }
         
@@ -366,9 +389,22 @@ public class KeyInfoExtractionIntegrationTest {
         javax.xml.parsers.DocumentBuilder builder = factory.newDocumentBuilder();
         
         ByteArrayInputStream inputStream = new ByteArrayInputStream(xml.getBytes());
-        org.w3c.dom.Element documentElement = builder.parse(inputStream).getDocumentElement();
+        org.xml.sax.InputSource inputSource = new org.xml.sax.InputSource(inputStream);
+        org.w3c.dom.Element documentElement = builder.parse(inputSource).getDocumentElement();
         
-        return (Assertion) org.opensaml.core.xml.io.UnmarshallingUtil.unmarshall(documentElement);
+        Unmarshaller unmarshaller = XMLObjectProviderRegistrySupport.getUnmarshallerFactory()
+                .getUnmarshaller(documentElement);
+        
+        if (unmarshaller == null) {
+            throw new Exception("No Unmarshaller registered for element " + 
+                    documentElement.getNamespaceURI() + ":" + documentElement.getLocalName());
+        }
+        
+        try {
+            return (Assertion) unmarshaller.unmarshall(documentElement);
+        } catch (UnmarshallingException ex) {
+            throw new Exception("Error unmarshalling a SAML assertion", ex);
+        }
     }
 
     private KeyPair generateRSAKeyPair() throws Exception {
@@ -381,43 +417,5 @@ public class KeyInfoExtractionIntegrationTest {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
         keyGen.initialize(1024);
         return keyGen.generateKeyPair();
-    }
-
-    // Mock classes
-    private static class MockValidationContext {
-        private java.util.Map<String, Object> staticParameters = new java.util.HashMap<>();
-        private java.util.Map<String, Object> dynamicParameters = new java.util.HashMap<>();
-        private String validationFailureMessage;
-
-        public java.util.Map<String, Object> getStaticParameters() {
-            return staticParameters;
-        }
-
-        public java.util.Map<String, Object> getDynamicParameters() {
-            return dynamicParameters;
-        }
-
-        public void setStaticParameter(String key, Object value) {
-            staticParameters.put(key, value);
-        }
-
-        public String getValidationFailureMessage() {
-            return validationFailureMessage;
-        }
-
-        public void setValidationFailureMessage(String message) {
-            this.validationFailureMessage = message;
-        }
-    }
-
-    private enum ValidationResult {
-        VALID, INVALID, INDETERMINATE
-    }
-
-    private interface ValidationContext {
-        java.util.Map<String, Object> getStaticParameters();
-        java.util.Map<String, Object> getDynamicParameters();
-        void setValidationFailureMessage(String message);
-        String getValidationFailureMessage();
     }
 }
