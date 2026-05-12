@@ -175,6 +175,7 @@ abstract public class AbstractOrchestrationButton implements ClickHandler {
             String xuaUsername = "valid";
             getSamlParams().put("$saml-username$",xuaUsername);
             try {
+                // TODO from 617x
                 SiteSpec x = null;
                 if (context == null) {
                     x = new SiteSpec();

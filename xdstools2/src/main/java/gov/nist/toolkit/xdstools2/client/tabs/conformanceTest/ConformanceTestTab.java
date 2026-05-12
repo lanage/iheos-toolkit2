@@ -1088,6 +1088,7 @@ public class ConformanceTestTab extends ToolWindow implements TestRunner, Contro
 				if (testContext == null) {
 					x.setHomeName("testContext is null");
 				} else {
+					// TODO This was in 617x
 					//x.setHomeName(testContext.getSiteName());
 					//x.setHomeId(testContext.getSiteUnderTestName());
 				}

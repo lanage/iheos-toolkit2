@@ -723,6 +723,7 @@ public abstract class GenericQueryTab  extends ToolWindow implements StatusDispl
                             stsSpec.setGazelleXuaUsername(selectedValue);
                             SiteSpec x = getSiteSelection();
                             if (x == null) {
+                                // TODO from 617x
                                 x = new SiteSpec();
                                 x.setName("NONE");
                                 x.setHomeId("NONE");
