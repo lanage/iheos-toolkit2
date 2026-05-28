@@ -45,7 +45,8 @@
         Source:
         https://groovy-lang.org/releasenotes/groovy-2.5.html
         -->
-        <groovyVersion>2.4.21</groovyVersion>
+        <groovyVersion>4.0.23</groovyVersion>
+        <groovy.version>4.0.23</groovy.version>
 
         <!--<groovyVersion>2.4.5</groovyVersion>-->
         <!--<groovyVersion>2.1.1</groovyVersion>-->
@@ -60,7 +61,8 @@
   location: class gov.nist.toolkit.xdstools2.client.widgets.buttons.CopyButton.CopyButtonClickHandler
         -->
         <!-- <gwtVersion>2.6.1</gwtVersion> -->
-        <spock.version>1.3-groovy-2.4</spock.version>
+        <spock.version>2.3-groovy-4.0</spock.version>
+        <!-- Alternative: 2.4-M1-groovy-4.0, 2.4-M3-groovy-4.0, or 2.3-groovy-3.0 -->
         <!--
         1.3-groovy-2.4
         1.2-groovy-2.4
@@ -68,30 +70,10 @@
          -->
 <!--        as of 8/9/2023
 <mavenCompilerPluginVersion>3.1</mavenCompilerPluginVersion>-->
-        <mavenCompilerPluginVersion>3.8.1</mavenCompilerPluginVersion> <!-- 3.8.0 -->
+        <mavenCompilerPluginVersion>3.11.0</mavenCompilerPluginVersion> <!-- 3.8.0 -->
 <!--        <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>-->
         <!-- as of 8/10/2023 -->
-<!--        <groovy-eclipse-compiler.version>2.9.0-01</groovy-eclipse-compiler.version>-->
-        <!--
-        The maven-compiler-plugin does not actually compile, but rather delegates the compilation to a different artifact (in our case, the groovy-eclipse-batch artifact):
-        Source:
-        https://github.com/groovy/groovy-eclipse/wiki/Groovy-Eclipse-Maven-plugin
-        -->
-        <groovy-eclipse-compiler.version>3.6.0-03</groovy-eclipse-compiler.version>
-        <!-- 3.6.0-03 -->
-        <!-- as of 8/10/2023 -->
-        <!--
-        Remember that you still need to specify a Groovy artifact as a build dependency in addition to the maven-compiler-plugin dependency. The Groovy dependency version should match the compiler version.
-        Source:
-        https://github.com/groovy/groovy-eclipse/wiki/Groovy-Eclipse-Maven-plugin
-        -->
-<!--        <groovy-eclipse-batch.version>2.4.3-01</groovy-eclipse-batch.version> &lt;!&ndash; 2.3.4-01 &ndash;&gt;-->
-        <groovy-eclipse-batch.version>2.4.21-01</groovy-eclipse-batch.version>
-        <!--
-        2.3.4-01,
-        2.4.21-01
-        2.5.10-01 NOTE: Matching Groovy version has no groovy-all jar file due to Java 9 re-design.
-        -->
+        <!-- groovy-eclipse-compiler and groovy-eclipse-batch removed - using gmavenplus-plugin instead -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven-source-plugin.version>2.3</maven-source-plugin.version>
         <maven-deploy-plugin.version>2.8.1</maven-deploy-plugin.version>
@@ -174,6 +156,60 @@
 
     <dependencyManagement>
     <dependencies>
+            <!-- Apache Groovy BOM to force version overrides -->
+            <dependency>
+                <groupId>org.apache.groovy</groupId>
+                <artifactId>groovy-bom</artifactId>
+                <version>4.0.23</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Provides version for any module still declaring codehaus groovy-all
+                 as a plain JAR (no type = jar). Satisfies POM validation without
+                 requiring the artifact to exist, as long as it is excluded everywhere. -->
+            <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-all</artifactId>
+                <version>3.0.21</version>
+                <!-- No type tag = jar type. 3.0.21 DOES exist on Maven Central. -->
+            </dependency>
+
+            <!-- Covers explicit pom-type requests for the codehaus artifact -->
+            <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-all</artifactId>
+                <version>3.0.21</version>
+                <type>pom</type>
+            </dependency>
+
+            <!-- The actual modern artifact all modules should use -->
+            <dependency>
+                <groupId>org.apache.groovy</groupId>
+                <artifactId>groovy-all</artifactId>
+                <version>4.0.23</version>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.groovy</groupId>
+                <artifactId>groovy</artifactId>
+                <version>4.0.23</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.groovy</groupId>
+                <artifactId>groovy-json</artifactId>
+                <version>4.0.23</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.groovy</groupId>
+                <artifactId>groovy-xml</artifactId>
+                <version>4.0.23</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.groovy</groupId>
+                <artifactId>groovy-test</artifactId>
+                <version>4.0.23</version>
+            </dependency>
             <dependency>
                 <groupId>net.ihe.gazelle</groupId>
                 <artifactId>sequoia-security-adaptor-jar</artifactId>
@@ -188,6 +224,12 @@
                 <groupId>gov.nist.toolkit</groupId>
                 <artifactId>config-datatypes</artifactId>
                 <version>7.12.0</version><!-- xdstk -->
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>gov.nist.toolkit</groupId>
@@ -320,6 +362,12 @@
                 <groupId>gov.nist.toolkit</groupId>
                 <artifactId>installation</artifactId>
                 <version>7.12.0</version><!-- xdstk -->
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>gov.nist.toolkit</groupId>
@@ -380,6 +428,12 @@
                 <groupId>gov.nist.toolkit</groupId>
                 <artifactId>xds-exceptions</artifactId>
                 <version>7.12.0</version><!-- xdstk -->
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>gov.nist.toolkit</groupId>
@@ -390,11 +444,23 @@
                 <groupId>gov.nist.toolkit</groupId>
                 <artifactId>utilities</artifactId>
                 <version>7.12.0</version><!-- xdstk -->
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>gov.nist.toolkit</groupId>
                 <artifactId>registry-metadata</artifactId>
                 <version>7.12.0</version><!-- xdstk -->
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>gov.nist.toolkit</groupId>
@@ -415,6 +481,12 @@
                 <groupId>gov.nist.toolkit</groupId>
                 <artifactId>actor-transaction</artifactId>
                 <version>7.12.0</version><!-- xdstk -->
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <!--            <dependency>-->
             <!--                <groupId>gov.nist.toolkit</groupId>-->
@@ -489,6 +561,12 @@
                 <groupId>javax.jms</groupId>
                 <artifactId>jms</artifactId>
                 <version>1.1</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>mx4j</groupId>
@@ -523,6 +601,10 @@
                     <exclusion>
                         <groupId>commons-collections</groupId>
                         <artifactId>commons-collections</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>*</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -617,17 +699,39 @@
                 <artifactId>servlet-api</artifactId>
                 <version>2.5</version>
                 <scope>provided</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.sun.ebxml</groupId>
                 <artifactId>ebxmlrr-common</artifactId>
                 <version>1.0</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.spockframework</groupId>
                 <artifactId>spock-core</artifactId>
                 <version>${spock.version}</version>
                 <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.groovy</groupId>
+                        <artifactId>groovy-all</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <!-- The following was used along with spock version 0.7-groovy-2.0.
             See http://stackoverflow.com/questions/15526510/junit-maven-parallel-test-execution-error for details -->
@@ -676,16 +780,34 @@
                 <groupId>org.apache.ws.commons.axiom</groupId>
                 <artifactId>axiom-api</artifactId>
                 <version>1.2.10</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.ws.commons.axiom</groupId>
                 <artifactId>axiom-impl</artifactId>
                 <version>1.2.10</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.ws.commons.axiom</groupId>
                 <artifactId>axiom-dom</artifactId>
                 <version>1.2.10</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>commons-lang</groupId>
@@ -699,6 +821,12 @@
                 <artifactId>gwt-user</artifactId>
                 <version>${gwtVersion}</version>
                 <scope>provided</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.google.gwt</groupId>
@@ -749,6 +877,12 @@
                 <groupId>org.apache.ws.commons.axiom</groupId>
                 <artifactId>axiom-common-impl</artifactId>
                 <version>1.2.14</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <!-- grizzly-http-servlet 2.4.4 uses at least javax 4.0 servlet -->
             <dependency>
@@ -756,6 +890,12 @@
                 <artifactId>javax.servlet-api</artifactId>
                 <version>3.0.1</version>
                 <scope>provided</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <!--<dependency>-->
             <!--<groupId>xmlunit</groupId>-->
@@ -777,6 +917,12 @@
                 <groupId>org.apache.commons.io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>2.4</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
                 <!--
                 <scope>system</scope>
                 <systemPath>${basedir}/../lib/commons-io-2.4.jar</systemPath>
@@ -788,11 +934,7 @@
                 <version>3.1</version>
             </dependency>
             <!-- for now wsseTool limits this version -->
-            <dependency>
-                <groupId>org.codehaus.groovy</groupId>
-                <artifactId>groovy-all</artifactId>
-                <version>${groovyVersion}</version>
-            </dependency>
+            <!-- Duplicate removed - already in dependencyManagement at line 179 -->
             <!--            <dependency>-->
             <!--                <groupId>com.smartgwt</groupId>-->
             <!--                <artifactId>smartgwt</artifactId>-->
@@ -1028,21 +1170,48 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.groovy</groupId>
-                <artifactId>groovy-eclipse-compiler</artifactId>
-                <version>${groovy-eclipse-compiler.version}</version>
-                <extensions>true</extensions>
-            </plugin>
-            <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>${mavenCompilerPluginVersion}</version>
+                <version>3.11.0</version>
                 <configuration>
-<!--                    <release>11</release>-->
-                    <source>8</source>
-                    <target>8</target>
+                    <source>17</source>
+                    <target>17</target>
                 </configuration>
             </plugin>
 
         </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.gmavenplus</groupId>
+                    <artifactId>gmavenplus-plugin</artifactId>
+                    <version>4.3.1</version>
+                    <executions>
+                        <execution>
+                            <id>default-groovy-compile</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>addSources</goal>
+                                <goal>compile</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>default-groovy-test-compile</id>
+                            <phase>generate-test-sources</phase>
+                            <goals>
+                                <goal>addTestSources</goal>
+                                <goal>compileTests</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.groovy</groupId>
+                            <artifactId>groovy</artifactId>
+                            <version>4.0.23</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 </project>
