@@ -443,7 +443,7 @@ public class PropertyManager {
 	}
 
 	private String[] splitTrimProperty(String text, String delimiter) {
-		if (text == null  || text.trim().equals("") || text.trim().startsWith("\${")) return null;
+		if (text == null  || text.trim().equals("") || text.trim().startsWith('${')) return null;
 
 		String[] items = text.split(delimiter);
 		for (int i = 0; i < items.length; i++)

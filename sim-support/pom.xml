@@ -101,80 +101,53 @@
                     <source>17</source>
                     <target>17</target>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>default-compile</id>
-                        <phase>none</phase>
-                        <configuration>
-                            <skip>true</skip>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>4.3.1</version>
+                <configuration>
+                    <sources>
+                        <source>
+                            <directory>${project.basedir}/src/main/java</directory>
+                            <includes>
+                                <include>**/*.groovy</include>
+                            </includes>
+                        </source>
+                    </sources>
+                    <testSources>
+                        <testSource>
+                            <directory>${project.basedir}/src/test/java</directory>
+                            <includes>
+                                <include>**/*.groovy</include>
+                            </includes>
+                        </testSource>
+                    </testSources>
+                    <targetBytecode>17</targetBytecode>
+                </configuration>
                 <executions>
                     <execution>
-                        <id>sim-support-groovy-compile</id>
-                        <phase>compile</phase>
+                        <id>add-groovy-sources</id>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>addSources</goal>
-                            <goal>compile</goal>
+                            <goal>addTestSources</goal>
                         </goals>
-                        <configuration>
-                            <sources>
-                                <source>
-                                    <directory>${project.basedir}/src/main/java</directory>
-                                    <includes>
-                                        <include>**/*.groovy</include>
-                                        <include>**/*.java</include>
-                                    </includes>
-                                </source>
-                                <source>
-                                    <directory>${project.basedir}/src/main/groovy</directory>
-                                    <includes>
-                                        <include>**/*.groovy</include>
-                                    </includes>
-                                </source>
-                            </sources>
-                        </configuration>
                     </execution>
                     <execution>
-                        <id>sim-support-groovy-test-compile</id>
-                        <phase>generate-test-sources</phase>
+                        <id>compile-groovy</id>
+                        <phase>compile</phase>
                         <goals>
-                            <goal>addTestSources</goal>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>test-compile-groovy</id>
+                        <phase>test-compile</phase>
+                        <goals>
                             <goal>compileTests</goal>
                         </goals>
-                        <configuration>
-                            <testSources>
-                                <testSource>
-                                    <directory>${project.basedir}/src/test/java</directory>
-                                    <includes>
-                                        <include>**/*.groovy</include>
-                                        <include>**/*.java</include>
-                                    </includes>
-                                </testSource>
-                                <testSource>
-                                    <directory>${project.basedir}/src/test/groovy</directory>
-                                    <includes>
-                                        <include>**/*.groovy</include>
-                                    </includes>
-                                </testSource>
-                            </testSources>
-                        </configuration>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.groovy</groupId>
-                        <artifactId>groovy</artifactId>
-                        <version>4.0.23</version>
-                        <scope>compile</scope>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

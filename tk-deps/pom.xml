@@ -1185,29 +1185,30 @@
                     <groupId>org.codehaus.gmavenplus</groupId>
                     <artifactId>gmavenplus-plugin</artifactId>
                     <version>4.3.1</version>
-                    <executions>
-                        <execution>
-                            <id>default-groovy-compile</id>
-                            <phase>generate-sources</phase>
-                            <goals>
-                                <goal>addSources</goal>
-                                <goal>compile</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>default-groovy-test-compile</id>
-                            <phase>generate-test-sources</phase>
-                            <goals>
-                                <goal>addTestSources</goal>
-                                <goal>compileTests</goal>
-                            </goals>
-                        </execution>
-                    </executions>
+                    <configuration>
+                        <sources>
+                            <source>
+                                <directory>${project.basedir}/src/main/groovy</directory>
+                                <includes>
+                                    <include>**/*.groovy</include>
+                                </includes>
+                            </source>
+                        </sources>
+                        <testSources>
+                            <testSource>
+                                <directory>${project.basedir}/src/test/groovy</directory>
+                                <includes>
+                                    <include>**/*.groovy</include>
+                                </includes>
+                            </testSource>
+                        </testSources>
+                    </configuration>
                     <dependencies>
                         <dependency>
                             <groupId>org.apache.groovy</groupId>
                             <artifactId>groovy</artifactId>
                             <version>4.0.23</version>
+                            <scope>runtime</scope>
                         </dependency>
                     </dependencies>
                 </plugin>

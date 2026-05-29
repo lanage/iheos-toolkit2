@@ -76,7 +76,7 @@ public class Assertion {
 		xpath = asser.getText();
 		if (xpath != null) {
 			xpath = xpath
-					.replaceAll("\\$DATE\\$", date)
+					.replaceAll(/\$DATE\$/, date)
 					.replaceAll("SITE", testConfig.siteXPath);
 		}
 		OMElement validationsEle = asser.getFirstChildWithName(new QName("Validations"));
