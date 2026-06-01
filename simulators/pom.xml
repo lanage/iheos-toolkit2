@@ -100,6 +100,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy-xml</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.codehaus.groovy.modules.http-builder</groupId>
             <artifactId>http-builder</artifactId>
             <exclusions>
@@ -153,6 +157,91 @@
                     <source>17</source>
                     <target>17</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
+                <version>4.3.1</version>
+                <configuration>
+                    <sources>
+                        <source>
+                            <directory>${project.basedir}/src/main/java</directory>
+                            <includes>
+                                <include>**/*.groovy</include>
+                            </includes>
+                        </source>
+                        <source>
+                            <directory>${project.basedir}/src/main/groovy</directory>
+                            <includes>
+                                <include>**/*.groovy</include>
+                            </includes>
+                        </source>
+                    </sources>
+                    <testSources>
+                        <testSource>
+                            <directory>${project.basedir}/src/test/java</directory>
+                            <includes>
+                                <include>**/*.groovy</include>
+                            </includes>
+                        </testSource>
+                    </testSources>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>generate-stubs</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generateStubs</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>compile-groovy</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>remove-stubs</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>removeStubs</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>generate-test-stubs</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>generateTestStubs</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>compile-groovy-tests</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>compileTests</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>remove-test-stubs</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>removeTestStubs</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.groovy</groupId>
+                        <artifactId>groovy</artifactId>
+                        <version>4.0.23</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.groovy</groupId>
+                        <artifactId>groovy-xml</artifactId>
+                        <version>4.0.23</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

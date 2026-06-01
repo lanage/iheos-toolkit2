@@ -64,6 +64,51 @@
                     <target>17</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
+                <version>4.3.1</version>
+                <configuration>
+                    <sources>
+                        <source>
+                            <directory>${project.basedir}/src/main/java</directory>
+                            <includes>
+                                <include>**/*.groovy</include>
+                            </includes>
+                        </source>
+                    </sources>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>generate-stubs</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generateStubs</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>compile-groovy</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>remove-stubs</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>removeStubs</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.groovy</groupId>
+                        <artifactId>groovy</artifactId>
+                        <version>4.0.23</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
         </plugins>
     </build>
 

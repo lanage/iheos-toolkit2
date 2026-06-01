@@ -241,11 +241,11 @@ public class SAMLAssertionBuilder {
         //Create the Signature.
         XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM"); /* Removed argument for internal API: , new org.jcp.xml.dsig.internal.dom.XMLDSigRI() */
 		List envelopedTransform = Collections.singletonList(fac.newTransform(Transform.ENVELOPED, (TransformParameterSpec) null));
-        Reference ref = fac.newReference(assertionId, fac.newDigestMethod(DigestMethod.SHA1, null), envelopedTransform, null, null);
+        Reference ref = fac.newReference(assertionId, fac.newDigestMethod("http://www.w3.org/2001/04/xmlenc#sha256", null), envelopedTransform, null, null);
 
         //Create the SignedInfo.
         SignedInfo signInfo = fac.newSignedInfo(fac.newCanonicalizationMethod(CanonicalizationMethod.EXCLUSIVE, (C14NMethodParameterSpec) null),
-				  	fac.newSignatureMethod(SignatureMethod.RSA_SHA1, null), Collections.singletonList(ref));
+				  	fac.newSignatureMethod("http://www.w3.org/2001/04/xmldsig-more#rsa-sha256", null), Collections.singletonList(ref));
 
         //Load the KeyStore and get the signing key and certificate.
         

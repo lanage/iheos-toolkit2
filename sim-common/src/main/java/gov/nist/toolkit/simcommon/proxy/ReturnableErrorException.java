@@ -9,4 +9,8 @@ public class ReturnableErrorException extends Exception {
         super();
         this.response = response;
     }
+
+    public HttpResponse getResponse() {
+        return response;
+    }
 }
