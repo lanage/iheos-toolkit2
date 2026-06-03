@@ -22,11 +22,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
+                <!-- explicit compilerId needed to avoid Eclipse compiler override -->
                 <configuration>
                     <compilerId>javac</compilerId>
-                    <source>17</source>
-                    <target>17</target>
                 </configuration>
             </plugin>
             <plugin>

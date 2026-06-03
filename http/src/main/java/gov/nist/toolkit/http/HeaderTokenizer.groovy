@@ -100,11 +100,11 @@ public class HeaderTokenizer {
 	
 	void tokenize() throws ParseException {
 		while(ok()) {
-			if ('"' == current()) { 
-				addToken(parseQuotedString()); 
-				continue; 
+			if (((char)'"') == current()) {  // Groovy4: char literal needs explicit cast to compare with char
+				addToken(parseQuotedString());
+				continue;
 			}
-			if ( '"' != current() && '=' == previous()) {
+			if ( ((char)'"') != current() && ((char)'=') == previous()) {
 				addToken(parseUnquotedValue());
 				continue;
 			}
@@ -156,7 +156,7 @@ public class HeaderTokenizer {
 		next();  // past open double-quote
 		int start = cursor;
 		while(ok()) {
-			if (current() == '"' && previous() != '\\') {
+			if (current() == ((char)'"') && previous() != ((char)'\\')) {
 				String val = inputString.substring(start, cursor);
 				next();  // past close double-quote
 				skipWhiteSpace();
@@ -164,7 +164,7 @@ public class HeaderTokenizer {
 			}
 			next();
 		}
-		throw new ParseException("Invalid quoted value - no terminating double-quote found");
+		throw new ParseException("Invalid quoted value - no terminating double-quote found", 0);
 	}
 	
 	Character[] xseparators = ['(', ')', '<', '>', '@' , ',', ';', ':', '\\', '"', '/', '[',
@@ -219,7 +219,7 @@ public class HeaderTokenizer {
 	}
 		
 	String lwsp = " \t ";
-	boolean isLWSP(char a) { return lwsp.indexOf(a) > -1; }
+	boolean isLWSP(char a) { return lwsp.indexOf((int) a) > -1; }
 	
 	boolean isSpecial(char a) { return HeaderToken.isSpecial(a); }
 	

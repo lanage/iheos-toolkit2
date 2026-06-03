@@ -128,10 +128,8 @@
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>${mavenCompilerPluginVersion}</version>
+                <!-- excludes the WSSE adapter stub which has unresolvable types -->
                 <configuration>
-                    <source>17</source>
-                    <target>17</target>
                     <excludes>
                         <exclude>**/src/main/java/gov/nist/toolkit/soap/wsseToolkitAdapter/**/*.java</exclude>
                     </excludes>

@@ -41,15 +41,6 @@
 
         <plugins>
 
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${mavenCompilerPluginVersion}</version>
-                <configuration>
-                    <source>17</source>
-                    <target>17</target>
-                </configuration>
-            </plugin>
-
             <!-- Begin profile part 2/2 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

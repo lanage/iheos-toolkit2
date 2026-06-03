@@ -48,7 +48,7 @@ public class HttpHeaderParser {
 			if (token.getToken().equals(HeaderToken.LT)) {  // < found
 				return untilGT(tokenizer);
 			} else {
-				throw new ParseException("Expected < or name - found " + token.getValue() + " in " + tokenizer.getCursorStatus());
+				throw new ParseException("Expected < or name - found " + token.getValue() + " in " + tokenizer.getCursorStatus(), 0);
 			}
 		} else {  // input is string
 			return token.getValue();
@@ -77,7 +77,7 @@ public class HttpHeaderParser {
 		 */
 		token = tokenizer.getNextToken();   // colon
 		if (!token.equals(HeaderToken.COLON))
-			throw new ParseException("Expected pattern - HeaderName: Value - found " + name + " " + token + " in " + line);
+			throw new ParseException("Expected pattern - HeaderName: Value - found " + name + " " + token + " in " + line, 0);
 
 		/**
 		 * Header value
@@ -94,7 +94,7 @@ public class HttpHeaderParser {
 			 * ; separator between value and first param or between param n and param n+1
 			 */
 			if (!(token.isToken() && token.getToken().equals(HeaderToken.SEMICOLON)))
-				throw new ParseException("Expected ; - found " + token + " after " + tokenizer.previousToken + " in " + line);
+				throw new ParseException("Expected ; - found " + token + " after " + tokenizer.previousToken + " in " + line, 0);
 
 			/**
 			 * Get param name
@@ -103,7 +103,7 @@ public class HttpHeaderParser {
 			if (token == null)
 				break;
 			if (token.isToken()) 
-				throw new ParseException("Expected Parameter name - found " + token + " in " + line);
+				throw new ParseException("Expected Parameter name - found " + token + " in " + line, 0);
 			String paramName = token.getValue();
 
 			/**
@@ -120,13 +120,13 @@ public class HttpHeaderParser {
 			 * = separator between param name and param value
 			 */
 			if (!(token.isToken() && token.getToken().equals(HeaderToken.EQUALS)))
-				throw new ParseException("Expected name=value - got  " + tokenizer.getPreviousToken() + " " + token + " in " + line);
+				throw new ParseException("Expected name=value - got  " + tokenizer.getPreviousToken() + " " + token + " in " + line, 0);
 
 			token = tokenizer.getNextToken();
 			if (token == null) 
-				throw new ParseException("Expected = value - got  " + tokenizer.getPreviousToken() + " " + token + " in " + line);
+				throw new ParseException("Expected = value - got  " + tokenizer.getPreviousToken() + " " + token + " in " + line, 0);
 			if (token.isToken())
-				throw new ParseException("Expected = value - got  " + tokenizer.getPreviousToken() + " " + token + " in " + line);
+				throw new ParseException("Expected = value - got  " + tokenizer.getPreviousToken() + " " + token + " in " + line, 0);
 			String paramVal = token.getValue();
 			params.put(paramName, paramVal);
 

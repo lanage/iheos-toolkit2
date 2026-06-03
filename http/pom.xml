@@ -187,79 +187,16 @@
                 </executions>
             </plugin>
             <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${mavenCompilerPluginVersion}</version>
-                <configuration>
-                    <source>17</source>
-                    <target>17</target>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <configuration>
-                    <sources>
-                        <source>
-                            <directory>${project.basedir}/src/main/java</directory>
-                            <includes>
-                                <include>**/*.groovy</include>
-                            </includes>
-                        </source>
-                    </sources>
-                    <testSources>
-                        <testSource>
-                            <directory>${project.basedir}/src/test/java</directory>
-                            <includes>
-                                <include>**/*.groovy</include>
-                            </includes>
-                        </testSource>
-                    </testSources>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>generate-stubs</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generateStubs</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>compile-groovy</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>remove-stubs</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>removeStubs</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>generate-test-stubs</id>
-                        <phase>generate-test-sources</phase>
-                        <goals>
-                            <goal>generateTestStubs</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>test-compile-groovy</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>addTestSources</goal>
-                            <goal>compileTests</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>remove-test-stubs</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>removeTestStubs</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <dependencies>
+                    <!-- groovy-xml needed at Groovy compile time for XmlSlurper/XmlParser usage -->
+                    <dependency>
+                        <groupId>org.apache.groovy</groupId>
+                        <artifactId>groovy-xml</artifactId>
+                        <version>${groovyVersion}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>

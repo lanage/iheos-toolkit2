@@ -190,6 +190,13 @@ public abstract class AbstractActorFactory {
 		return actorType;
 	}
 
+	// Setter required so `af.actorType = ...` (buildNewSimulator) works: the field is private and
+	// subclasses override getActorType(), making this a read-only Groovy property without it
+	// (ReadOnlyPropertyException). Subclasses that hardcode getActorType() simply ignore this value.
+	public void setActorType(ActorType actorType) {
+		this.actorType = actorType;
+	}
+
 	public Simulator buildNewSimulator(SimManager simm, ActorType at, SimId simID, String environment, boolean save) throws Exception {
 		logger.info("Build new Simulator of type " + getClass().getSimpleName() + " simID: " + simID);
 
