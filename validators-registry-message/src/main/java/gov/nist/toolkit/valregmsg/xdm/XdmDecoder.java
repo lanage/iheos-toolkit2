@@ -7,6 +7,7 @@ import gov.nist.toolkit.errorrecording.factories.ErrorRecorderBuilder;
 import gov.nist.toolkit.errorrecording.factories.TextErrorRecorderBuilder;
 import gov.nist.toolkit.registrymetadata.Metadata;
 import gov.nist.toolkit.utilities.io.Io;
+import gov.nist.toolkit.utilities.io.HashType;
 import gov.nist.toolkit.utilities.xml.Util;
 import gov.nist.toolkit.valregmsg.validation.factories.ValidationContextValidationFactory;
 import gov.nist.toolkit.valsupport.client.ValidationContext;
@@ -194,8 +195,10 @@ public class XdmDecoder extends AbstractMessageValidator {
 							er.err(Code.NoCode, "Metadata size is " + size + " but document size is " + doc.getSizeAsString(), subsetDir,"");
 						else
 							er.detail("size matches");
-						if (hash != null && !hash.equalsIgnoreCase(doc.getSha1()))
-							er.err(Code.NoCode, "Metadata hash is " + hash + " but document hash is " + doc.getSha1(), subsetDir,"");
+						// Dual-mode: verify against the document using the algorithm implied by the
+						// claimed hash length (40 -> SHA-1, 64 -> SHA-256).
+						if (hash != null && !HashType.matches(doc.get(), hash))
+							er.err(Code.NoCode, "Metadata hash is " + hash + " but does not match the document", subsetDir,"");
 						else
 							er.detail("hash matches");
 

@@ -12,6 +12,7 @@ import gov.nist.toolkit.simcommon.server.SimCommon;
 import gov.nist.toolkit.fhir.simulators.support.*;
 import gov.nist.toolkit.soap.axis2.Soap;
 import gov.nist.toolkit.utilities.io.Hash;
+import gov.nist.toolkit.utilities.io.HashType;
 import gov.nist.toolkit.utilities.io.Io;
 import gov.nist.toolkit.valregmsg.message.DocumentAttachmentMapper;
 import gov.nist.toolkit.valregmsg.message.MetadataContainer;
@@ -138,8 +139,11 @@ public class RepPnRSim extends TransactionSimulator implements MetadataGeneratin
 				if (hasSize && !existingSize.equals(sizeStr)) {
 					er.err(XdsErrorCode.Code.XDSRepositoryMetadataError, "DocumentEntry(" + m.getId(eo) + ") has size slot with value " + existingSize + " which disagrees with computed value of " + sizeStr, this, "");
 				}
-				if (hasHash && !existingHash.equalsIgnoreCase(hash)) {
-					er.err(XdsErrorCode.Code.XDSRepositoryMetadataError, "DocumentEntry(" + m.getId(eo) + ") has hash slot with value " + existingHash + " which disagrees with computed value of " + hash, this, "");
+				// Dual-mode: verify the claimed hash against the document using the algorithm implied
+				// by the claimed hash length (40 -> SHA-1, 64 -> SHA-256). `hash` (SHA-1) is still
+				// computed above for stamping/logging per the IHE base-profile default.
+				if (hasHash && !HashType.matches(storedDocument.content, existingHash)) {
+					er.err(XdsErrorCode.Code.XDSRepositoryMetadataError, "DocumentEntry(" + m.getId(eo) + ") has hash slot with value " + existingHash + " which disagrees with the document", this, "");
 				}
 
 				String mimeType = m.getMimeType(eo);

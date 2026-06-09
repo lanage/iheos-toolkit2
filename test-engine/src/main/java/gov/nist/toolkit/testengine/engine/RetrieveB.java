@@ -7,6 +7,7 @@ import gov.nist.toolkit.registrymetadata.Metadata;
 import gov.nist.toolkit.registrymsg.registry.RegistryResponseParser;
 import gov.nist.toolkit.registrymsg.repository.RetrieveResponseParser;
 import gov.nist.toolkit.registrymsg.repository.RetrievedDocumentModel;
+import gov.nist.toolkit.utilities.io.HashType;
 import gov.nist.toolkit.registrymsg.repository.RetrievedDocumentsModel;
 import gov.nist.toolkit.soap.axis2.Soap;
 import gov.nist.toolkit.testengine.transactions.BasicTransaction;
@@ -362,11 +363,13 @@ public class RetrieveB {
 			//
 			// hash
 			//
-			if ( req.getHash() != null && rsp.getHash() != null && !rsp.getHash().equals(req.getHash().toLowerCase()))
-				errors.append("Hash does not match - submission has [" + req.getHash() + "] and Retrieve response has [" + rsp.getHash() + "]\n");
+			// Dual-mode: verify the retrieved document against the claimed hash using the algorithm
+			// implied by the claimed hash length (40 -> SHA-1, 64 -> SHA-256).
+			if ( req.getHash() != null && rsp.getContents() != null && !HashType.matches(rsp.getContents(), req.getHash()))
+				errors.append("Hash does not match - submission has [" + req.getHash() + "] and the Retrieve response document does not hash to it\n");
 
-			if (query_hash != null && !query_hash.equals(rsp.getHash()))
-				errors.append("Hash does not match - query response has [" + query_hash + "] and Retrieve response has [" + rsp.getHash() + "]\n");
+			if (query_hash != null && rsp.getContents() != null && !HashType.matches(rsp.getContents(), query_hash))
+				errors.append("Hash does not match - query response has [" + query_hash + "] and the Retrieve response document does not hash to it\n");
 
 			//
 			// size
