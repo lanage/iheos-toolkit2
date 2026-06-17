@@ -37,7 +37,7 @@ import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.Phase;
-import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.axis2.kernel.http.HTTPConstants;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
@@ -800,11 +800,11 @@ public class Soap implements SoapInterface {
 			System.out.println("Generating HTTP 1.0");
 
 			opts.setProperty(
-					org.apache.axis2.transport.http.HTTPConstants.HTTP_PROTOCOL_VERSION,
-					org.apache.axis2.transport.http.HTTPConstants.HEADER_PROTOCOL_10);
+					org.apache.axis2.kernel.http.HTTPConstants.HTTP_PROTOCOL_VERSION,
+					org.apache.axis2.kernel.http.HTTPConstants.HEADER_PROTOCOL_10);
 
 			opts.setProperty(
-					org.apache.axis2.transport.http.HTTPConstants.CHUNKED,
+					org.apache.axis2.kernel.http.HTTPConstants.CHUNKED,
 					Boolean.FALSE);
 
 		}
