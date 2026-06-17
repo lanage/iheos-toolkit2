@@ -2,6 +2,7 @@ package gov.nist.toolkit.testengine.assertionEngine;
 
 import gov.nist.toolkit.installation.shared.TestSession;
 import gov.nist.toolkit.pluginSupport.loader.PluginClassLoader;
+import gov.nist.toolkit.testengine.engine.validations.evs.EVSValidatorLoader;
 import gov.nist.toolkit.testengine.engine.validations.registry.RegistryValidatorLoader;
 import gov.nist.toolkit.testengine.engine.validations.soap.SoapAssertionLoader;
 import gov.nist.toolkit.testkitutilities.TestKit;
@@ -35,6 +36,8 @@ public class AssertionContext {
                     loader = new SoapAssertionLoader(new TestKitSearchPath(environment, testSession));
                 else if (pluginType == TestKit.PluginType.REGISTRY_VALIDATOR)
                     loader = new RegistryValidatorLoader(new TestKitSearchPath(environment, testSession));
+                else if (pluginType == TestKit.PluginType.EVS_VALIDATOR)
+                    loader = new EVSValidatorLoader(new TestKitSearchPath(environment, testSession));
                 else
                     throw new ToolkitRuntimeException("No classloader for Plugin type " + pluginType);
             } catch (IOException e) {
