@@ -116,12 +116,12 @@ class SoapHeaderValidator extends AbstractSoapValidater {
                             }
                             break;
                         case "isNotPresent":
-                            if (!v.namedFieldIsNotPresent(key)) {
+                            if (!v.namedFieldIsNotPresent(key, section, XPath, attribute, comment)) {
                                 errors = v.getErrors();
                             }
                             break;
                         default:
-                            errors="Unrecognized Stored Query validation method:" + method + ". Expecting one of single, singleCode, containsCode, contains.";
+                            errors="Unrecognized Soap Header validation method:" + method + ". Expecting one of single, singleCode, containsCode, contains, isPresent, isNotEmpty, isNotPresent.";
                             break;
                     }
                 } else {

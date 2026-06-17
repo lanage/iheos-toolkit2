@@ -47,6 +47,18 @@ public class PropertyManager {
 	static private final String CLIENT_CIPHER_SUITES = "Client_Cipher_Suites";
 	static private final String CLIENT_SSL_PROTOCOLS = "Client_SSL_Protocols";
 
+	static private final String GAZELLE_EVS_URL = "Gazelle_EVS_URL";
+	static private final String GAZELLE_AUTHORIZATION_STRING = "Gazelle_Authorization_String";
+
+	static private final String SIGN_IN_LABEL="Sign_in_label";
+	static private final String SIGN_OUT_LABEL="Sign_out_label";
+	static private final String SIGNED_IN="Signed_in";
+	static private final String SIGNED_OUT="Signed_out";
+
+
+	static private final String SOCKET_TIMEOUT = "Socket_Timeout";
+	static private final String CONNECT_TIMEOUT = "Connect_Timeout";
+
 	private String propFile;
 	private Properties toolkitProperties = null;
 
@@ -200,6 +212,17 @@ public class PropertyManager {
 	public String getToolkitGazelleConfigURL() {
 		loadProperties();
 		return (String) toolkitProperties.get(GAZELLE_CONFIG_URL);
+	}
+
+
+	public String getGazelleEVSURL() {
+		loadProperties();
+		return (String) toolkitProperties.get(GAZELLE_EVS_URL);
+	}
+
+	public String getGazelleAuthorizationString() {
+		loadProperties();
+		return (String) toolkitProperties.get(GAZELLE_AUTHORIZATION_STRING);
 	}
 
 	public String getStsActorName() throws TkNotFoundException {
@@ -440,6 +463,26 @@ public class PropertyManager {
 	public String[] getClientSSLProtocols() {
 		loadProperties();
 		return splitTrimProperty((String)toolkitProperties.get(CLIENT_SSL_PROTOCOLS), ",");
+	}
+
+	public int getSocketTimeout() {
+		loadProperties();
+		String value = (String) toolkitProperties.getProperty(SOCKET_TIMEOUT);
+		try {
+			return Integer.parseInt(value.trim());
+		} catch (Throwable e) {
+			return -1;
+		}
+	}
+
+	public int getConnectTimeout() {
+		loadProperties();
+		String value = (String) toolkitProperties.getProperty(CONNECT_TIMEOUT);
+		try {
+			return Integer.parseInt(value.trim());
+		} catch (Throwable e) {
+			return -1;
+		}
 	}
 
 	private String[] splitTrimProperty(String text, String delimiter) {
