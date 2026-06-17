@@ -74,6 +74,10 @@ public class Soap implements SoapInterface {
     private static Logger logger = Logger.getLogger(Soap.class.getName());
 
 	int timeout = 1000 * 60 * 60;
+        int defaultSocketTimeout = 20;	// 20 seconds
+        int defaultConnectTimeout = 20;	// 20 seconds
+        int deployedSocketTimeout = -1;
+        int deployedConnectTimeout = -1;
 	ServiceClient serviceClient = null;
 	OperationClient operationClient = null;
 	OMElement result = null;
@@ -465,6 +469,7 @@ public class Soap implements SoapInterface {
 		// Boolean.TRUE);
 		// includes setting of endpoint
 		setOptions(options);
+        loadTimeoutValues();
         setMaxConnections();
         options.setProperty(
 				AddressingConstants.ADD_MUST_UNDERSTAND_TO_ADDRESSING_HEADERS,
@@ -565,7 +570,7 @@ public class Soap implements SoapInterface {
 		   start = System.nanoTime();
 			operationClient.execute(block); // execute sync or async
         } catch (AxisFault e) {
-           logger.warning("$$$$$ AxisFault: with timeout of " + timeout + ", Elapsed time: " + TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start) / 1000.0 + " milliseconds");
+           logger.warning("$$$$$ AxisFault: with timeout of " + deployedSocketTimeout + ", Elapsed time: " + TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start) / 1000.0 + " seconds");
            soapFault = e;
            logger.warning(ExceptionUtil.exception_details(soapFault));
             MessageContext inMsgCtx = getInputMessageContext();
@@ -837,6 +842,26 @@ public class Soap implements SoapInterface {
 
 	}
 
+    // Load timeout values one time.
+    // They will be set to -1 the first time through.
+    // First choice is from the properties file.
+    // Second choice is from the default values
+
+    void loadTimeoutValues() {
+        if (deployedSocketTimeout < 0) {
+            if (Installation.instance().propertyServiceManager().getPropertyManager().getSocketTimeout() >= 0) {
+                deployedSocketTimeout = Installation.instance().propertyServiceManager().getPropertyManager().getSocketTimeout() * 1000;
+            } else {
+                deployedSocketTimeout = defaultSocketTimeout * 1000;
+            }
+            if (Installation.instance().propertyServiceManager().getPropertyManager().getConnectTimeout() >= 0) {
+                deployedConnectTimeout = Installation.instance().propertyServiceManager().getPropertyManager().getConnectTimeout() * 1000;
+            } else {
+                deployedConnectTimeout = defaultConnectTimeout * 1000;
+            }
+        }
+    }
+
     // Set the max connections and timeout - needed because by default you can only have
     // two connections to a single host.  This doesn't work with simulators in toolkit.
     void setMaxConnections() {
@@ -844,8 +869,8 @@ public class Soap implements SoapInterface {
         HttpConnectionManagerParams params = new HttpConnectionManagerParams();
         params.setDefaultMaxConnectionsPerHost(50);
         params.setMaxTotalConnections(50);
-        params.setSoTimeout(20000);
-        params.setConnectionTimeout(20000);
+        params.setSoTimeout(deployedSocketTimeout);
+        params.setConnectionTimeout(deployedConnectTimeout);
         multiThreadedHttpConnectionManager.setParams(params);
         HttpClient httpClient = new HttpClient(multiThreadedHttpConnectionManager);
         serviceClient.getServiceContext().getConfigurationContext().setProperty(HTTPConstants.CACHED_HTTP_CLIENT, httpClient);
