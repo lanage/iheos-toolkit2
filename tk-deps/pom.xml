@@ -23,8 +23,8 @@
         <!--   begin before security update   -->
 <!--        <jackson.version>2.11.3</jackson.version>   -->
         <!-- end -->
-        <jackson.version>2.12.7.1</jackson.version>
-        <jacksonauxilary.version>2.15.0</jacksonauxilary.version> <!-- REVERTED: 2.21.1 not available, will upgrade with OpenSAML 5.1.4 -->
+        <jackson.version>2.15.0</jackson.version>
+        <jacksonauxilary.version>2.15.0</jacksonauxilary.version>
         <grizzly.version>2.4.4</grizzly.version>  <!-- 2.4.4, 2.3.22  -->
         <!--
         This Jackson version has runtime class conflicts/problems.
@@ -390,11 +390,6 @@
                 <version>7.12.0</version><!-- xdstk -->
             </dependency>
             <dependency>
-                <groupId>xml-security</groupId>
-                <artifactId>xmlsec</artifactId>
-                <version>1.3.0</version> <!-- REVERTED: 2.3.4 not available, will upgrade with OpenSAML 5.1.4 -->
-            </dependency>
-            <dependency>
                 <groupId>gov.nist.toolkit</groupId>
                 <artifactId>results</artifactId>
                 <version>7.12.0</version><!-- xdstk -->
@@ -503,23 +498,6 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>3.18.0</version>
             </dependency>
-            <!-- OpenSAML 4.0.1 Dependencies -->
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-core</artifactId>
-                <version>4.0.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-saml-api</artifactId>
-                <version>4.0.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opensaml</groupId>
-                <artifactId>opensaml-saml-impl</artifactId>
-                <version>4.0.1</version>
-            </dependency>
-                        
             <dependency>
                 <groupId>org.apache.axis2</groupId>
                 <artifactId>axis2-transport-http</artifactId>
