@@ -164,3 +164,6 @@ CRYPTOGRAPHIC_RESTORATION_COMPLETE.md
 DETAILED_PARENT_COMPARISON.md
 DEPENDENCY_ANALYSIS.md
 DEPENDENCY_FIXES_COMPLETE.md
+
+# Security scanner output (keep as CI artifacts, not committed)
+trivy*
