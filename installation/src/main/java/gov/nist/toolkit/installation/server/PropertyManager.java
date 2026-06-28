@@ -486,7 +486,12 @@ public class PropertyManager {
 	}
 
 	private String[] splitTrimProperty(String text, String delimiter) {
-		if (text == null  || text.trim().equals("") || text.trim().startsWith('${')) return null;
+		// Builds the "${" prefix from char 36 ('$') instead of a literal "${": this .java is
+		// compiled by the Groovy compiler (see installation/pom.xml), where a literal "${"
+		// opens an unterminated GString interpolation and fails to compile. This form is
+		// valid plain Java (so IntelliJ is happy) and compiles cleanly under Groovy.
+		String placeholderPrefix = Character.toString((char) 36) + "{";
+		if (text == null  || text.trim().equals("") || text.trim().startsWith(placeholderPrefix)) return null;
 
 		String[] items = text.split(delimiter);
 		for (int i = 0; i < items.length; i++)
