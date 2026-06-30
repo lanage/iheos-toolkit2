@@ -385,7 +385,11 @@ public class Soap implements SoapInterface {
 		// Axis2 has some timing problems so, yes, this is necessary
 		AxisFault lastFault = null;
 		boolean finished = false;
-
+/*
+		@Jason
+		I had to comment out these lines. The line serviceClient.engageModule("addressing") was failing
+		I don't know what this is intended to do. Removing it does not seem right. I should look
+		at the previous version and walk through the library to see the value of this.
 		// - CHECK engaging the addressing module. Should it really be
 		// engaged a each soap call? -Antoine
 		// - CHECK is the module engagement really asynchronous ?? -Antoine
@@ -416,7 +420,7 @@ public class Soap implements SoapInterface {
 		}
 		if (!finished)
 			throw lastFault;
-
+*/
 
 		// vbeera: modified code -START-
 		MessageContext outMsgCtx = null;
@@ -586,7 +590,15 @@ public class Soap implements SoapInterface {
 			// Unfortunately, when we are here, the inMsgCtx.getEnvelope() method returns null;
 			//			result = soapBody.getFirstElement();
 			//			logger.info(new OMFormatter(result).toString());
-        }
+        } catch (Exception e) {
+			// @Jason, I added this exception. It helped me find the class mismatch error.
+			logger.warning("$$$$$ Unknown exception: with timeout of " + deployedSocketTimeout + ", Elapsed time: " + TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start) / 1000.0 + " seconds");
+			logger.warning(ExceptionUtil.exception_details(e));
+			MessageContext inMsgCtx = getInputMessageContext();
+			OMElement soapBody = inMsgCtx.getEnvelope().getBody();
+			result = soapBody.getFirstElement();
+			logger.info(new OMFormatter(result).toString());
+		}
         finally {
 			logger.info(String.format("******************************** AFTER SOAP SEND to %s ****************************", endpoint));
 
@@ -872,6 +884,9 @@ public class Soap implements SoapInterface {
         params.setSoTimeout(deployedSocketTimeout);
         params.setConnectionTimeout(deployedConnectTimeout);
         multiThreadedHttpConnectionManager.setParams(params);
+		// @Jason
+		// The two lines below are part of the original Toolkit code. When these are left as is,
+		// you get a class mismatch error (casting does not work).
         HttpClient httpClient = new HttpClient(multiThreadedHttpConnectionManager);
         serviceClient.getServiceContext().getConfigurationContext().setProperty(HTTPConstants.CACHED_HTTP_CLIENT, httpClient);
     }
