@@ -91,6 +91,13 @@
             <groupId>gov.nist.toolkit</groupId>
             <artifactId>utilities</artifactId>
         </dependency>
+        <!-- Used directly by gov.nist.toolkit.fhir.simulators.tools.SerializedStateExporter.
+             Already reachable transitively via sim-common -> config-datatypes, declared here too
+             so it isn't lost if that transitive path ever changes. Version comes from tk-deps. -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
@@ -178,6 +185,61 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Opt-in only: `mvn -pl simulators -am package -P standalone-tools -DskipTests`.
+             Not part of the default build (no impact on normal `mvn install`/CI) because it
+             exists for exactly one purpose: producing a single self-contained "fat" jar that
+             can be copied to a Linux app server and run with nothing else on the classpath -
+             `java -jar simulators-<version>-standalone-tools.jar <externalCacheDir> <outputDir>`.
+             This does NOT replace the module's normal thin jar (used as a library dependency
+             by the rest of the reactor) - shadedArtifactAttached produces the fat jar as an
+             ADDITIONAL artifact alongside it, distinguished by the "standalone-tools" classifier.
+             See simulators/src/main/java/gov/nist/toolkit/fhir/simulators/tools/README.md. -->
+        <profile>
+            <id>standalone-tools</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <version>3.5.1</version>
+                        <executions>
+                            <execution>
+                                <id>standalone-tools</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                                    <shadedClassifierName>standalone-tools</shadedClassifierName>
+                                    <transformers>
+                                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                            <mainClass>gov.nist.toolkit.fhir.simulators.tools.SerializedStateExporter</mainClass>
+                                        </transformer>
+                                    </transformers>
+                                    <filters>
+                                        <filter>
+                                            <artifact>*:*</artifact>
+                                            <excludes>
+                                                <!-- signed jars on the classpath would otherwise fail signature
+                                                     verification once their classes are repackaged into this jar -->
+                                                <exclude>META-INF/*.SF</exclude>
+                                                <exclude>META-INF/*.DSA</exclude>
+                                                <exclude>META-INF/*.RSA</exclude>
+                                                <exclude>module-info.class</exclude>
+                                            </excludes>
+                                        </filter>
+                                    </filters>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <scm>
         <tag>v3.0.2a</tag>
