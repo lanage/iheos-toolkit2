@@ -87,6 +87,17 @@ public class SerializedStateExporter {
             System.exit(1);
         }
         if (!dryRun) {
+            // Make the "never writes into the External Cache" promise structural rather than
+            // conventional. Output paths are the source path relativized against the External
+            // Cache, so pointing the output at the External Cache itself lands a test result
+            // export on <EC>/TestLogCache/<ts>/Results/<testId>.json - which is now the live file
+            // ResultPersistence.read() consults first, not an inert byproduct as it once was.
+            if (ecDir.toPath().toAbsolutePath().normalize()
+                    .equals(outDir.toPath().toAbsolutePath().normalize())) {
+                System.err.println("Output directory must not be the External Cache itself - "
+                        + "exporting in place would overwrite live toolkit data: " + outDir);
+                System.exit(1);
+            }
             if (!outDir.exists() && !outDir.mkdirs()) {
                 System.err.println("Cannot create output directory: " + outDir);
                 System.exit(1);

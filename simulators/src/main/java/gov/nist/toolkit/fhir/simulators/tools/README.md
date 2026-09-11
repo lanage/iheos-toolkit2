@@ -27,8 +27,16 @@ Walking `<externalCache>`:
 |---|---|---|
 | `simdb/**/reg_db.ser` | `gov.nist.toolkit.fhir.simulators.sim.reg.store.MetadataCollection` | `RegIndex` |
 | `simdb/**/rep_db.ser` | `gov.nist.toolkit.fhir.simulators.sim.rep.DocumentCollection` | `RepIndex` |
-| `TestLogCache/**/Results/*.ser` | `gov.nist.toolkit.results.client.Result` | `ResultPersistence` |
+| `TestLogCache/**/Results/*.ser` | `gov.nist.toolkit.results.client.Result` | `ResultPersistence` — **legacy files only, see below** |
 | `TestLogCache/**/<testId>/<testId>` (no file extension) | `gov.nist.toolkit.testenginelogging.client.LogMapDTO` | `JavaSerializationIO` |
+
+> **Test results no longer need this tool.** `ResultPersistence` now writes `Results/<testId>.json`
+> directly and reads JSON-first with a legacy `.ser` fallback that self-heals each old file the
+> first time it is read. This scan matches `*.ser` only, so on an installation running that build
+> it will report **zero** test results — not because they are missing, but because they are already
+> in the durable format and there is nothing left to convert. The rows above still matter for the
+> simulator indexes (`reg_db.ser`/`rep_db.ser`), which are still Java-serialized, and for test
+> results on installations that have not yet been read since upgrading.
 
 **Not exported, on purpose:**
 
@@ -400,7 +408,7 @@ manifest and look at every `FAILED` entry before deciding whether it's safe to p
 | `status: FAILED`, `error` starts with `java.io.InvalidClassException` | The exact failure mode this tool exists to catch — a class's shape (fields, `serialVersionUID`) no longer matches what wrote the file. If you're running this *before* a model change ships, this means the file was **already** incompatible with the code you're running — investigate separately; it isn't something this migration caused. | Not fixable by this tool. Note it, move on, export what's left. |
 | `status: FAILED`, `error` starts with `java.io.StreamCorruptedException` or `java.io.EOFException` | The file isn't a valid (or complete) Java serialization stream — truncated write, disk issue, or it's not actually a `.ser` file despite the name. | Inspect the file directly (`file <path>`, or a hex dump of the first few bytes — a real stream starts with `AC ED`). |
 | `status: FAILED`, `error` is `OutOfMemoryError` | One object graph is too large for the current heap. | Re-run with a larger `-Xmx`. |
-| Run finishes with `Scanned : 0` | Both `simdb/` and `TestLogCache/` are missing or empty under the path you gave. | You're probably pointed at the wrong directory — see the `simdb`/`TestLogCache` row above. |
+| Run finishes with `Scanned : 0` | Either you're pointed at the wrong directory, **or** this install has no Java-serialized state left to convert — test results written by a current build are already `.json`, and this scan matches `.ser` only. | Confirm `<path>/simdb` and `<path>/TestLogCache` exist. If they do and are populated, check whether `Results/` already contains `.json` files — in that case zero is the correct answer, not a failure. |
 | `Manifest written to ...` doesn't appear | You ran with `--dry-run` (manifest is intentionally not written) — this is expected, not an error. | Drop `--dry-run` for the real run. |
 
 ## FAQ
@@ -418,10 +426,14 @@ Nothing — they're never touched. Only files matching the four patterns in
 [What it exports](#what-it-exports) are opened at all.
 
 **Can I import this JSON back into the toolkit later?**
-Not yet. This tool only covers the *export* half of a migration. Reading the JSON back in after
-the model change ships needs a companion importer built against the *new* model classes, which by
-definition can't be written until you know the new shape. Keep the JSON and the manifest; build
-the importer when you build the migration.
+For **test results**, the toolkit reads JSON natively now — `ResultPersistence.read()` tries
+`Results/<testId>.json` first, using the same field-visibility contract this tool writes with, so a
+result exported here is in the format the running toolkit already consumes.
+
+For the **simulator indexes** (`reg_db.ser`/`rep_db.ser`) and **test logs** (`LogMapDTO`), no
+importer exists — nothing reads that JSON back in. Those remain export-only: keep the JSON and the
+manifest as a durable record, and build an importer against the new model classes when the model
+change is actually designed.
 
 **Does it cover FHIR simulator state?**
 Not `reg_db.ser`/`rep_db.ser`-style state — the FHIR side stores each resource as its own
